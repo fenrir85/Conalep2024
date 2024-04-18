@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>aspnet-BlazorRh-61ac186d-e1d4-4772-b103-01536df3fbfc</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Blazorise.Bootstrap" Version="1.5.1" />
+    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.5.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Components\SatId\Pages\" />
+    <Folder Include="Components\SatId\Shared\" />
+    <Folder Include="Components\Expediente\Pages\" />
+    <Folder Include="Components\Expediente\Shared\" />
+    <Folder Include="Components\Template\Shared\" />
+    <Folder Include="Components\Template\Pages\" />
+  </ItemGroup>
+
+</Project>

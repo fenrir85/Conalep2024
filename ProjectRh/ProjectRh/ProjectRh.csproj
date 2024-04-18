@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Version>1.5</Version>
+		<Authors>Megabit</Authors>
+		<Company>Megabit</Company>
+		<Description>
+			This is a Blazorise Template for a Blazor Server Application.
+			Blazorise is a component library built on top of Blazor and CSS frameworks like Bootstrap, FluentUI2, Tailwind, Bulma and Material.
+		</Description>
+		<Copyright>Copyright 2018-2024 Megabit</Copyright>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Components\Account\**" />
+	  <Content Remove="Components\Account\**" />
+	  <EmbeddedResource Remove="Components\Account\**" />
+	  <None Remove="Components\Account\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Azure.Identity" Version="1.11.1" />
+		<PackageReference Include="Blazorise" Version="1.5.*" />
+		<PackageReference Include="Blazorise.Bootstrap5" Version="1.5.*" />
+		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.5.*" />
+		<PackageReference Include="Blazorise.DataGrid" Version="1.5.*" />
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.4" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.4" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.4" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.4">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Components\Expediente\Pages\" />
+	  <Folder Include="Components\Expediente\Shared\" />
+	  <Folder Include="Components\SatId\Pages\" />
+	  <Folder Include="Components\SatId\Shared\" />
+	</ItemGroup>
+
+</Project>
