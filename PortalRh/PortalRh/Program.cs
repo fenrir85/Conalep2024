@@ -2,18 +2,21 @@ using Blazorise.Bootstrap5;
 using Blazorise.Icons.FontAwesome;
 using Microsoft.EntityFrameworkCore;
 using PortalRh.Data;
+using PortalRh.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//    options.UseSqlServer(connectionString));
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
-
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ConexionSQLLocalDB")));
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddScoped<IRepository, Repository>();
 
 AddBlazorise(builder.Services);
 

@@ -11,11 +11,21 @@
     </BarBrand>
     <BarMenu>
         <BarStart>
+         
             <BarItem>
-                <BarLink @bind-Visible="pagesBarVisible" To="/paginaprueba">
-                    <BarIcon IconName="IconName.Folder" />
-                    Expedientes
-                </BarLink>
+                <BarDropdown>
+                    <BarDropdownToggle>
+                        <BarIcon IconName="IconName.Folder" />
+                     Expedientes
+                    </BarDropdownToggle>
+                    <BarDropdownMenu>
+                        <BarDropdownItem To="/ListaExpediente">Lista de expedientes</BarDropdownItem>
+                    </BarDropdownMenu>
+                    <BarDropdownMenu>
+                        <BarDropdownItem To="/CrearExpediente">Crear expediente</BarDropdownItem>
+                    </BarDropdownMenu>
+                    
+                </BarDropdown>
             </BarItem>
 
             <BarItem>
