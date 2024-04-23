@@ -1,0 +1,114 @@
+﻿@page "/ListaExpediente"
+@using PortalRh.Models
+@using PortalRh.Repository
+@inject IRepository Repositorio
+@inject NavigationManager navigationManager
+
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="text-dark text-center">Lista de Expedientes</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+
+                        <th>Expediente ID</th>
+                        <th>CURP</th>
+                        <th>RFC</th>
+                        <th>Fecha de validación</th>
+                        <th>Primer Apellido</th>
+                        <th>Segundo apellido</th>
+                        <th>Nombre</th>
+                        <th>Fecha de nacimiento</th>
+                        <th>Sexo</th>
+                        <th>Edad</th>
+                        <th>Estado</th>
+                        <th>Municipio</th>
+                        <th>Localidad</th>
+                        <th>Calle</th>
+                        <th>Numero Exterior</th>
+                        <th>numero Interior</th>
+                        <th>Codigo Postal</th>
+                        <th>Telefono</th>
+                        <th>Celular</th>
+                        <th>Correo</th>
+                        <th>Grupo sanguineo</th>
+                        <th>NSS</th>
+                        <th>Grado de estudios</th>
+                        <th>Otro empleo</th>
+                        <th>Acciones</th>
+                    
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var expediente in ListExpediente)
+                    {
+                        <tr>
+
+                            <td>@expediente.ExpedienteID</td>
+                            <td>@expediente.CURP</td>
+                            <td>@expediente.RFC</td>
+                            <td>@expediente.FechaValidacionRFC</td>
+                            <td>@expediente.PrimerApellido</td>
+                            <td>@expediente.SegundoApellido</td>
+                            <td>@expediente.Nombre</td>
+                            <td>@expediente.FechaNacimiento</td>
+                            <td>@expediente.Sexo</td>
+                            <td>@expediente.Edad</td>
+                            <td>@expediente.Estado</td>
+                            <td>@expediente.Municipio</td>
+                            <td>@expediente.Localidad</td>
+                            <td>@expediente.Calle</td>
+                            <td>@expediente.NumeroExterior</td>
+                            <td>@expediente.NumeroInterior</td>
+                            <td>@expediente.CodigoPostal</td>
+                            <td>@expediente.Telefono</td>
+                            <td>@expediente.Celular</td>
+                            <td>@expediente.Correo</td>
+                            <td>@expediente.GrupoSanguineo</td>
+                            <td>@expediente.NSS</td>
+                            <td>@expediente.GradoEstudios</td>
+                            <td>@expediente.OtroEmpleo</td>
+                            <td>
+                                <a href="EditarExpediente/@expediente.ExpedienteID" class="btn btn-success btn-sm"><span class="oi oi-plus" aria-hidden="true"></span> Editar</a>
+                                <button @onclick="@( () => BorrarExpediente(expediente.ExpedienteID))" class="btn btn-danger btn-sm"><span class="oi oi-delete" aria-hidden="true"></span> Borrar</button>
+                            </td>
+                        
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    private List<Expediente> ListExpediente = new List<Expediente>();
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        ListExpediente = await Repositorio.GetExpediente();
+
+    }
+    //metodo para borrar registro
+    private async Task BorrarExpediente(string ExpedientId)
+    {
+
+        await Repositorio.EliminarExpediente(ExpedientId);
+
+        //Actualizar el modelo de  para que recargue la lista de
+        ListExpediente = await Repositorio.GetExpediente();
+
+    }
+
+}

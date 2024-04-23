@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using PortalRh.Models;
 
 namespace PortalRh.Data
 {
@@ -9,7 +11,6 @@ namespace PortalRh.Data
             : base(options)
         {
         }
-
-
+        public DbSet<Expediente> Expedientes { get; set; }
     }
 }
