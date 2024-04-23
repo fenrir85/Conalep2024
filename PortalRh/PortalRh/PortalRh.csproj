@@ -21,6 +21,10 @@
 		<PackageReference Include="Blazorise.DataGrid" Version="1.5.*" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.4" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.4" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.4">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -29,6 +33,9 @@
 	  <Folder Include="Components\Expedientes\Shared\" />
 	  <Folder Include="Components\SatId\Pages\" />
 	  <Folder Include="Components\SatId\Shared\" />
+	  <Folder Include="Pages\Expediente\" />
 	</ItemGroup>
+
+	<ProjectExtensions><VisualStudio><UserProperties properties_4launchsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>
