@@ -1,7 +1,8 @@
-﻿<Blazorise.ThemeProvider Theme="@theme">
+﻿<CascadingAuthenticationState>
+<Blazorise.ThemeProvider Theme="@theme">
     <Router AppAssembly="typeof(App).Assembly">
         <Found Context="routeData">
-            <RouteView RouteData="routeData" DefaultLayout="typeof(PortalRh.Layouts.MainLayout)" />
+            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(PortalRh.Layouts.MainLayout)" />
         </Found>
         <NotFound>
             <p>Sorry, there's nothing at this address.</p>
@@ -10,6 +11,7 @@
     <MessageProvider />
     <PageProgressProvider />
 </Blazorise.ThemeProvider>
+</CascadingAuthenticationState>
 @code {
     private Theme theme = new()
         {
