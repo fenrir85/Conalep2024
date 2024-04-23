@@ -10,10 +10,10 @@ namespace PortalRh.Models
         [Key]
         public string ExpedienteID { get; set; }
 
-        [MaxLength(18)]
+        [StringLength(18, MinimumLength = 18, ErrorMessage = "La CURP debe tener exactamente 18 caracteres.")]
         public string CURP { get; set; }
 
-        [MaxLength(13)]
+        [StringLength(13, MinimumLength = 13, ErrorMessage = "El RFC debe tener exactamente 13 caracteres.")]
         public string RFC { get; set; }
 
         public DateTime FechaValidacionRFC { get; set; }
@@ -48,7 +48,8 @@ namespace PortalRh.Models
         public string Telefono { get; set; }
 
         public string Celular { get; set; }
-
+        
+        [EmailAddress(ErrorMessage = "El campo de correo electrónico no tiene un formato válido.")]
         public string Correo { get; set; }
 
         public string NSS { get; set; }

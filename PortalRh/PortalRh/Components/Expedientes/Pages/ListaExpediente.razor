@@ -4,7 +4,6 @@
 @inject IRepository Repositorio
 @inject NavigationManager navigationManager
 
-
 <div class="card">
     <div class="card-header">
         <div class="row">
@@ -13,11 +12,13 @@
             </div>
         </div>
     </div>
+
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
                     <tr>
+
                         <th>Expediente ID</th>
                         <th>CURP</th>
                         <th>RFC</th>
@@ -43,12 +44,15 @@
                         <th>Grado de estudios</th>
                         <th>Otro empleo</th>
                         <th>Acciones</th>
+                    
                     </tr>
                 </thead>
+
                 <tbody>
                     @foreach (var expediente in ListExpediente)
                     {
                         <tr>
+
                             <td>@expediente.ExpedienteID</td>
                             <td>@expediente.CURP</td>
                             <td>@expediente.RFC</td>
@@ -77,6 +81,7 @@
                                 <a href="EditarExpediente/@expediente.ExpedienteID" class="btn btn-success btn-sm"><span class="oi oi-plus" aria-hidden="true"></span> Editar</a>
                                 <button @onclick="@( () => BorrarExpediente(expediente.ExpedienteID))" class="btn btn-danger btn-sm"><span class="oi oi-delete" aria-hidden="true"></span> Borrar</button>
                             </td>
+                        
                         </tr>
                     }
                 </tbody>
@@ -107,4 +112,3 @@
     }
 
 }
-

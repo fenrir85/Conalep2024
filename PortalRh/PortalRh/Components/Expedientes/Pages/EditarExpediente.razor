@@ -17,19 +17,11 @@
     <div class="card-body">
         <EditForm Model="ModeloExpediente" OnValidSubmit="@( () => ManejadorOnEditarExpediente())">
             <DataAnnotationsValidator></DataAnnotationsValidator>
+
+
             <div class="container">
 
                 <div class="form-group">
-                    <div class="row">
-                        <div class="col-2">
-                            <label>EXPEDIENTE ID</label>
-                        </div>
-                        <div class="col-6">
-                            <InputText @bind-Value="ModeloExpediente.ExpedienteID" class="form-control" readonly></InputText>
-                            <ValidationMessage For="() => ModeloExpediente.ExpedienteID"></ValidationMessage>
-                        </div>
-                    </div>
-                   <br />
 
                     <div class="form-group">
                         <div class="row">
@@ -37,7 +29,8 @@
                                 <label>CURP</label>
                             </div>
                             <div class="col-6">
-                                <InputText @bind-Value="ModeloExpediente.CURP" class="form-control" placeholder=""></InputText>
+                                <InputText @bind-Value="ModeloExpediente.CURP" class="form-control" placeholder="" maxlength="18"></InputText>
+
                                 <ValidationMessage For="() =>ModeloExpediente.CURP"></ValidationMessage>
                             </div>
                         </div>
@@ -51,7 +44,7 @@
                                 <label>RFC</label>
                             </div>
                             <div class="col-6">
-                                <InputText @bind-Value="ModeloExpediente.RFC" class="form-control" placeholder=""></InputText>
+                                <InputText @bind-Value="ModeloExpediente.RFC" class="form-control" placeholder="" maxlength="13"></InputText>
                                 <ValidationMessage For="() =>ModeloExpediente.RFC"></ValidationMessage>
                             </div>
                         </div>
@@ -153,6 +146,7 @@
                     </div>
                     <br />
 
+                    <h2>DOMICILIO</h2>
                     <div class="form-group">
                         <div class="row">
                             <div class="col-2">
@@ -192,7 +186,6 @@
                     </div>
                     <br />
 
-                    <h2>DOMICILIO</h2>
                     <div class="form-group">
                         <div class="row">
                             <div class="col-2">
@@ -244,8 +237,8 @@
                         </div>
                     </div>
                     <br />
-                    <h2>INFORMACIÓN DE CONTACTO</h2>
 
+                    <h2>INFORMACIÓN DE CONTACTO</h2>
                     <div class="form-group">
                         <div class="row">
                             <div class="col-2">
@@ -284,6 +277,7 @@
                         </div>
                     </div>
                     <br />
+
                     <h2>DATOS DE SEGURIDAD SOCIAL</h2>
                     <div class="form-group">
                         <div class="row">
@@ -319,8 +313,8 @@
                             </div>
                         </div>
                     </div>
-
                     <br />
+
                     <h2>EDUCACIÓN</h2>
                     <div class="form-group">
                         <div class="row">
@@ -370,7 +364,9 @@
         </EditForm>
     </div>
 </div>
+
 @code {
+
     private Expediente ModeloExpediente = new Expediente();
     [Parameter]
     public string? ExpedienteID { get; set; }
@@ -379,20 +375,22 @@
     {
         ModeloExpediente = await Repositorio.GetExpedienteId(ExpedienteID);
     }
-    //metodo para guardar un registro en tabla utilrenapo
+
+    //metodo para Editar un registro en tabla utilrenapo
     private async Task ManejadorOnEditarExpediente()
     {
         try
         {
+        
             var EditarRenapo = await Repositorio.ActualizarExpediente(ExpedienteID, ModeloExpediente);
             navigationManager.NavigateTo("/ListaExpediente");
+       
         }
         catch (Exception ex)
         {
-            // Manejar la excepción aquí, por ejemplo, puedes registrarla para depuración
+           
             Console.WriteLine($"Error al actualizar el expediente: {ex.Message}");
-            // También puedes mostrar un mensaje de error al usuario si lo deseas
-            // Por ejemplo: mostrar una notificación de error en la interfaz de usuario
+            
         }
     }
 
