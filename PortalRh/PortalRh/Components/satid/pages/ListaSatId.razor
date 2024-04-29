@@ -6,32 +6,77 @@
 @using Blazorise
 @using System.Globalization
 
-<H3>Sat ID</H3>
-
-<EditForm Model="satIdCif" OnValidSubmit="HandleValidSubmit">
+<EditForm Model="satIdCif">
+    <H3>Sat ID</H3>
+    <hr />
+    <div  class="form-group row">
     <FieldLabel>Rfc</FieldLabel>
-    <InputText @bind-Value="satIdCif.Rfc"  />
+    <InputText @bind-Value="satIdCif.Rfc"   />
     <FieldLabel>IdCif</FieldLabel>
-    <InputText @bind-Value="satIdCif.IdCif" />
-    
-    
-    <Button @onclick="FindSatId"><Icon Name="IconName.Search"/> Buscar</Button>
-
-    <Button Type="ButtonType.Submit"><Icon Name="IconName.Send"/> Enviar</Button>
+    <InputText @bind-Value="satIdCif.IdCif"  />
+    <Button @onclick="FindSatId" Color="Color.Default"><Icon Name="IconName.Search"/> Buscar</Button>
+    </div>
 </EditForm>
 
+
+<EditForm Model="sat" OnValidSubmit="HandleValidSubmit">
+<hr />
+<div class="form-group row">
+        <InputText @bind-Value="sat.Rfc"  hidden></InputText>
+        <InputText @bind-Value="sat.IdCif"  hidden></InputText>
+        <FieldLabel>Nombre</FieldLabel>
+        <InputText @bind-Value="sat.Nombre"  />
+        <FieldLabel>Primer Apellido</FieldLabel>
+        <InputText @bind-Value="sat.Apellido1"  />
+        <FieldLabel>Primer Apellido</FieldLabel>
+        <InputText @bind-Value="sat.Apellido2"  />
+        <FieldLabel>Fecha Nacimiento</FieldLabel>
+        <InputDate @bind-Value="sat.Birthday" />
+        <H5>Domicilio</H5>
+        <hr />
+        <FieldLabel>Entidad</FieldLabel>
+        <InputText @bind-Value="sat.EntidadFederativa" />
+        <FieldLabel>Municipio</FieldLabel>
+        <InputText @bind-Value="sat.Municipio" />
+        <FieldLabel>Tipo Vialidad</FieldLabel>
+        <InputText @bind-Value="sat.TipoVialidad" />
+        <FieldLabel>Nombre Vialidad</FieldLabel>
+        <InputText @bind-Value="sat.NombreVialidad" />
+        <FieldLabel>No. Exterior</FieldLabel>
+        <InputText @bind-Value="sat.NumeroExterior" />
+        <FieldLabel>No. Interior</FieldLabel>
+        <InputText @bind-Value="sat.NumeroInterior" />
+        <FieldLabel>Colonia</FieldLabel>
+        <InputText @bind-Value="sat.Colonia" />
+        <FieldLabel>Codigo Postal</FieldLabel>
+        <InputText @bind-Value="sat.CodigoPostal" />
+        <H5>Datos Sat</H5>
+        <hr />
+        <FieldLabel>Regimen Fiscal</FieldLabel>
+        <InputText @bind-Value="sat.RegimenFiscal" />
+        <FieldLabel>Fecha Alta</FieldLabel>
+        <InputDate @bind-Value="sat.FechaAlta" />
+        <FieldLabel>Ultima Actualizacion Sat</FieldLabel>
+        <InputDate @bind-Value="sat.LastUpdateSat" />
+        <FieldLabel>Email</FieldLabel>
+        <InputText @bind-Value="sat.Email" />
+        <FieldLabel>Url</FieldLabel>
+        <FilePicker @bind-Value="sat.Url"></FilePicker>
+</div>
+<Button Type="ButtonType.Submit"><Icon Name="IconName.Send" /> Enviar</Button>
+
+</EditForm>
 @code{
-
     private SatIdCif satIdCif = new SatIdCif();
-
-
+    private SatIdData satData= new SatIdData();
+    private SatIdData sat = new SatIdData();
 
     public void HandleValidSubmit()
     {
         // Save User object to backend
     }
 
-    public async void FindSatId()
+    public async Task FindSatId()
     {
         var htmlDoc = new HtmlDocument();
         var client = new HttpClient()
@@ -53,46 +98,41 @@
         var htmlBody = htmlDoc.DocumentNode.SelectSingleNode("//body");
         var text = htmlBody.InnerText.ToString();
 
-
-        Guid guid = Guid.NewGuid();
-        SatIdData satData = new SatIdData();
-        satData.Id = guid;
-        satData.IdCif = satIdCif.IdCif;
-        satData.Rfc = satIdCif.Rfc;
-        satData.Curp = StringsUtils.ExtractStringBeetween(text, "CURP:", "Nombre:"); 
-        satData.Nombre = StringsUtils.ExtractStringBeetween(text, "Nombre:", "Apellido Paterno:"); 
-        satData.Apellido1 = StringsUtils.ExtractStringBeetween(text, "Apellido Paterno:", "Apellido Materno:");
-        satData.Apellido2 = StringsUtils.ExtractStringBeetween(text, "Apellido Materno:", "Fecha Nacimiento:");
-
-        var fechaNacimiento = StringsUtils.ExtractStringBeetween(text, "Fecha Nacimiento:", "Fecha de Inicio de operaciones:");
-        satData.Birthday = DateOnly.ParseExact(fechaNacimiento, "dd-MM-yyyy",CultureInfo.InvariantCulture);
-
-        var fechaOperaciones = StringsUtils.ExtractStringBeetween(text, "Fecha de alta:");
-        satData.FechaAlta = DateOnly.ParseExact(fechaNacimiento, "dd-MM-yyyy", CultureInfo.InvariantCulture);
-
-        satData.SituacionContribuyente = StringsUtils.ExtractStringBeetween(text, "Situación del contribuyente:", "Fecha del último cambio de situación:");
-
-        var lastUpdate = StringsUtils.ExtractStringBeetween(text, "Fecha del último cambio de situación:", "Datos de Ubicación");
-        satData.LastUpdateSat = DateOnly.ParseExact(lastUpdate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
-
-        var domicilio = new Domicilio();
-
-
-        domicilio.EntidadFederativa = StringsUtils.ExtractStringBeetween(text, "Entidad Federativa:", "Municipio o delegación:");
-        domicilio.Municipio = StringsUtils.ExtractStringBeetween(text, "delegación:", "Colonia:");
-        domicilio.Colonia = StringsUtils.ExtractStringBeetween(text, "Colonia:", "Tipo de vialidad:");
-        domicilio.TipoVialidad = StringsUtils.ExtractStringBeetween(text, "Tipo de vialidad:", "Nombre de la vialidad:");
-        domicilio.NombreVialidad = StringsUtils.ExtractStringBeetween(text, "Nombre de la vialidad:", "Número exterior:");
-        domicilio.NumeroExterior = StringsUtils.ExtractStringBeetween(text, "Número exterior:", "Número interior:");
-        domicilio.NumeroInterior = StringsUtils.ExtractStringBeetween(text, "Número interior:", "SNCP:");
-        domicilio.CodigoPostal = StringsUtils.ExtractStringBeetween(text, "SNCP:", "Correo electrónico:");
-
-
-        satData.Domicilio = domicilio;
-        satData.Email = StringsUtils.ExtractStringBeetween(text, "Correo electrónico:", "AL:");
-        satData.RegimenFiscal = StringsUtils.ExtractStringBeetween(text, "Régimen:", "Fecha de alta:");
+        if (!text.Contains("no se le ha emitido su Cédula de identificación fiscal"))
+        {
+            Guid guid = Guid.NewGuid();
+            SatIdData satData = new SatIdData();
+            satData.Id = guid;
+            satData.IdCif = satIdCif.IdCif;
+            satData.Rfc = satIdCif.Rfc;
+            satData.Curp = StringsUtils.ExtractStringBeetween(text, "CURP:", "Nombre:");
+            satData.Nombre = StringsUtils.ExtractStringBeetween(text, "Nombre:", "Apellido Paterno:");
+            satData.Apellido1 = StringsUtils.ExtractStringBeetween(text, "Apellido Paterno:", "Apellido Materno:");
+            satData.Apellido2 = StringsUtils.ExtractStringBeetween(text, "Apellido Materno:", "Fecha Nacimiento:");
+            var fechaNacimiento = StringsUtils.ExtractStringBeetween(text, "Fecha Nacimiento:", "Fecha de Inicio de operaciones:");
+            satData.Birthday = DateOnly.ParseExact(fechaNacimiento, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            var fechaOperaciones = StringsUtils.ExtractStringBeetween(text, "Fecha de alta:");
+            satData.FechaAlta = DateOnly.ParseExact(fechaNacimiento, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            satData.SituacionContribuyente = StringsUtils.ExtractStringBeetween(text, "Situación del contribuyente:", "Fecha del último cambio de situación:");
+            var lastUpdate = StringsUtils.ExtractStringBeetween(text, "Fecha del último cambio de situación:", "Datos de Ubicación");
+            satData.LastUpdateSat = DateOnly.ParseExact(lastUpdate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            satData.EntidadFederativa = StringsUtils.ExtractStringBeetween(text, "Entidad Federativa:", "Municipio o delegación:");
+            satData.Municipio = StringsUtils.ExtractStringBeetween(text, "delegación:", "Colonia:");
+            satData.Colonia = StringsUtils.ExtractStringBeetween(text, "Colonia:", "Tipo de vialidad:");
+            satData.TipoVialidad = StringsUtils.ExtractStringBeetween(text, "Tipo de vialidad:", "Nombre de la vialidad:");
+            satData.NombreVialidad = StringsUtils.ExtractStringBeetween(text, "Nombre de la vialidad:", "Número exterior:");
+            satData.NumeroExterior = StringsUtils.ExtractStringBeetween(text, "Número exterior:", "Número interior:");
+            satData.NumeroInterior = StringsUtils.ExtractStringBeetween(text, "Número interior:", "CP:");
+            satData.CodigoPostal = StringsUtils.ExtractStringBeetween(text, "CP:", "Correo electrónico:");
+            satData.Email = StringsUtils.ExtractStringBeetween(text, "Correo electrónico:", "AL:");
+            var textextractforRegimen = StringsUtils.ExtractStringBeetween(text, "Régimen:");
+            satData.RegimenFiscal = StringsUtils.ExtractStringBeetween(textextractforRegimen, "Régimen:", "Fecha de alta:");
+            sat = satData;
+        }
+        else
+        {
+            
+        }
         
-        Console.WriteLine("Ok");
-
     }
 }

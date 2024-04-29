@@ -12,4 +12,5 @@
         public string CodigoPostal { get; set; }
 
     }
+    
 }
