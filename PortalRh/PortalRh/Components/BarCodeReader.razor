@@ -1,0 +1,28 @@
+﻿@page "/barcodescanner"
+@inject IJSRuntime JSRuntime
+
+<h3>BarCodeReader</h3>
+
+<div>
+    <video id="barcodeScanner" width="300" height="200"></video>
+    <button @onclick="StartScanner">Start Scanning</button>
+    <p>@ScannedBarcode</p>
+</div>
+
+@code {
+    private string ScannedBarcode { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("startBarcodeScanner");
+        }
+    }
+
+    private async Task StartScanner()
+    {
+        ScannedBarcode = await JSRuntime.InvokeAsync<string>("scanBarcode");
+        StateHasChanged();
+    }
+}

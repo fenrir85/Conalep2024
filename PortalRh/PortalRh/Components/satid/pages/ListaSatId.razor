@@ -1,0 +1,98 @@
+@page "/SatId"
+@using HtmlAgilityPack
+@using PortalRh.Dto
+@using PortalRh.Models
+@using PortalRh.Utils
+@using Blazorise
+@using System.Globalization
+
+<H3>Sat ID</H3>
+
+<EditForm Model="satIdCif" OnValidSubmit="HandleValidSubmit">
+    <FieldLabel>Rfc</FieldLabel>
+    <InputText @bind-Value="satIdCif.Rfc"  />
+    <FieldLabel>IdCif</FieldLabel>
+    <InputText @bind-Value="satIdCif.IdCif" />
+    
+    
+    <Button @onclick="FindSatId"><Icon Name="IconName.Search"/> Buscar</Button>
+
+    <Button Type="ButtonType.Submit"><Icon Name="IconName.Send"/> Enviar</Button>
+</EditForm>
+
+@code{
+
+    private SatIdCif satIdCif = new SatIdCif();
+
+
+
+    public void HandleValidSubmit()
+    {
+        // Save User object to backend
+    }
+
+    public async void FindSatId()
+    {
+        var htmlDoc = new HtmlDocument();
+        var client = new HttpClient()
+            {
+                BaseAddress = new Uri("https://siat.sat.gob.mx/app/qr/faces/pages/mobile/")
+            };
+
+        try
+        {
+            var data = await client.GetStringAsync("validadorqr.jsf?D1=10&D2=1&D3=" + satIdCif.IdCif + "_" + satIdCif.Rfc);
+            htmlDoc.LoadHtml(data);
+        }
+        catch (Exception ex)
+        {
+            string mensaje = ex.Message;
+            Console.WriteLine(mensaje);
+        }
+
+        var htmlBody = htmlDoc.DocumentNode.SelectSingleNode("//body");
+        var text = htmlBody.InnerText.ToString();
+
+
+        Guid guid = Guid.NewGuid();
+        SatIdData satData = new SatIdData();
+        satData.Id = guid;
+        satData.IdCif = satIdCif.IdCif;
+        satData.Rfc = satIdCif.Rfc;
+        satData.Curp = StringsUtils.ExtractStringBeetween(text, "CURP:", "Nombre:"); 
+        satData.Nombre = StringsUtils.ExtractStringBeetween(text, "Nombre:", "Apellido Paterno:"); 
+        satData.Apellido1 = StringsUtils.ExtractStringBeetween(text, "Apellido Paterno:", "Apellido Materno:");
+        satData.Apellido2 = StringsUtils.ExtractStringBeetween(text, "Apellido Materno:", "Fecha Nacimiento:");
+
+        var fechaNacimiento = StringsUtils.ExtractStringBeetween(text, "Fecha Nacimiento:", "Fecha de Inicio de operaciones:");
+        satData.Birthday = DateOnly.ParseExact(fechaNacimiento, "dd-MM-yyyy",CultureInfo.InvariantCulture);
+
+        var fechaOperaciones = StringsUtils.ExtractStringBeetween(text, "Fecha de alta:");
+        satData.FechaAlta = DateOnly.ParseExact(fechaNacimiento, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+
+        satData.SituacionContribuyente = StringsUtils.ExtractStringBeetween(text, "Situación del contribuyente:", "Fecha del último cambio de situación:");
+
+        var lastUpdate = StringsUtils.ExtractStringBeetween(text, "Fecha del último cambio de situación:", "Datos de Ubicación");
+        satData.LastUpdateSat = DateOnly.ParseExact(lastUpdate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+
+        var domicilio = new Domicilio();
+
+
+        domicilio.EntidadFederativa = StringsUtils.ExtractStringBeetween(text, "Entidad Federativa:", "Municipio o delegación:");
+        domicilio.Municipio = StringsUtils.ExtractStringBeetween(text, "delegación:", "Colonia:");
+        domicilio.Colonia = StringsUtils.ExtractStringBeetween(text, "Colonia:", "Tipo de vialidad:");
+        domicilio.TipoVialidad = StringsUtils.ExtractStringBeetween(text, "Tipo de vialidad:", "Nombre de la vialidad:");
+        domicilio.NombreVialidad = StringsUtils.ExtractStringBeetween(text, "Nombre de la vialidad:", "Número exterior:");
+        domicilio.NumeroExterior = StringsUtils.ExtractStringBeetween(text, "Número exterior:", "Número interior:");
+        domicilio.NumeroInterior = StringsUtils.ExtractStringBeetween(text, "Número interior:", "SNCP:");
+        domicilio.CodigoPostal = StringsUtils.ExtractStringBeetween(text, "SNCP:", "Correo electrónico:");
+
+
+        satData.Domicilio = domicilio;
+        satData.Email = StringsUtils.ExtractStringBeetween(text, "Correo electrónico:", "AL:");
+        satData.RegimenFiscal = StringsUtils.ExtractStringBeetween(text, "Régimen:", "Fecha de alta:");
+        
+        Console.WriteLine("Ok");
+
+    }
+}

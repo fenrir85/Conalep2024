@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PortalRh.Models;
 
+
 namespace PortalRh.Data
 {
     public class ApplicationDbContext :IdentityDbContext
@@ -12,5 +13,6 @@ namespace PortalRh.Data
         {
         }
         public DbSet<Expediente> Expedientes { get; set; }
+        public DbSet<SatIdData> SatId { get; set; } 
     }
 }
