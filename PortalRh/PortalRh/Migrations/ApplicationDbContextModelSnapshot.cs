@@ -337,11 +337,13 @@ namespace PortalRh.Migrations
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
-                            b.Property<int>("NumeroExterior")
-                                .HasColumnType("int");
+                    b.Property<string>("NumeroExterior")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                            b.Property<int>("NumeroInterior")
-                                .HasColumnType("int");
+                    b.Property<string>("NumeroInterior")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                             b.Property<string>("OtroEmpleo")
                                 .IsRequired()
