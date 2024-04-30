@@ -39,9 +39,9 @@ namespace PortalRh.Models
 
         public string Calle { get; set; }
 
-        public int NumeroExterior { get; set; }
+        public string NumeroExterior { get; set; }
 
-        public int NumeroInterior { get; set; }
+        public string NumeroInterior { get; set; }
 
         public string CodigoPostal { get; set; }
 
