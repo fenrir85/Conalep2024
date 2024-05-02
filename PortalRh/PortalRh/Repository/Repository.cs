@@ -15,7 +15,7 @@ namespace PortalRh.Repository
         public async Task<Expediente> ActualizarExpediente(string ExpedienteId, Expediente actualizarExpediente)
         {
 
-            var ExpedienteDesdeDb = await _contexto.Expedientes.FindAsync();
+            var ExpedienteDesdeDb = await _contexto.Expedientes.FindAsync(ExpedienteId);
             ExpedienteDesdeDb.ExpedienteID = actualizarExpediente.ExpedienteID;
             ExpedienteDesdeDb.CURP = actualizarExpediente.CURP;
             ExpedienteDesdeDb.RFC = actualizarExpediente.RFC;

@@ -26,7 +26,7 @@
                                 <label>CURP</label>
                             </div>
                             <div class="col-6">
-                                <InputText @bind-Value="ModeloExpediente.CURP" class="form-control" placeholder="" maxlength="18"></InputText>
+                                <InputText @bind-Value="ModeloExpediente.CURP" class="form-control" placeholder="" maxlength="18" style="text-transform:uppercase"></InputText>
 
                                 <ValidationMessage For="() =>ModeloExpediente.CURP"></ValidationMessage>
                             </div>
@@ -41,7 +41,7 @@
                                 <label>RFC</label>
                             </div>
                             <div class="col-6">
-                                <InputText @bind-Value="ModeloExpediente.RFC" class="form-control" placeholder="" maxlength="13"></InputText>
+                                <InputText @bind-Value="ModeloExpediente.RFC" class="form-control" placeholder="" maxlength="13" style="text-transform:uppercase"></InputText>
                                 <ValidationMessage For="() =>ModeloExpediente.RFC"></ValidationMessage>
                             </div>
                         </div>
@@ -202,7 +202,7 @@
                                 <label>NUMERO EXTERIOR</label>
                             </div>
                             <div class="col-6">
-                                <InputNumber @bind-Value="ModeloExpediente.NumeroExterior" class="form-control" placeholder=""></InputNumber>
+                                <InputText @bind-Value="ModeloExpediente.NumeroExterior" class="form-control" placeholder=""></InputText>
                                 <ValidationMessage For="() =>ModeloExpediente.NumeroExterior"></ValidationMessage>
                             </div>
                         </div>
@@ -215,7 +215,7 @@
                                 <label>NUMERO INTERIOR</label>
                             </div>
                             <div class="col-6">
-                                <InputNumber @bind-Value="ModeloExpediente.NumeroInterior" class="form-control" placeholder=""></InputNumber>
+                                <InputText @bind-Value="ModeloExpediente.NumeroInterior" class="form-control" placeholder=""></InputText>
                                 <ValidationMessage For="() =>ModeloExpediente.NumeroInterior"></ValidationMessage>
                             </div>
                         </div>
@@ -365,9 +365,23 @@
 @code {
     private Expediente ModeloExpediente = new Expediente();
 
+    protected override void OnInitialized()
+    {
+        // Inicializar los valores por defecto 
+        ModeloExpediente.Sexo = "Hombre"; // Inicializar el select de Sexo en "Hombre"
+        ModeloExpediente.GrupoSanguineo = ""; // Inicializar el select de Grupo Sanguíneo en vacío
+        ModeloExpediente.OtroEmpleo = "SI"; // Inicializar el select de Otro Empleo en "SI"
+        ModeloExpediente.FechaNacimiento = DateTime.Today;
+        ModeloExpediente.FechaValidacionRFC = DateTime.Today;
+    }
+
     // Método para generar un GUID y luego guardar un registro en la tabla utilrenapo
     private async Task ManejadorOnCrearExpediente()
     {
+        ModeloExpediente.CURP = ModeloExpediente.CURP.ToUpper();
+        ModeloExpediente.RFC = ModeloExpediente.RFC.ToUpper();
+
+
         // Generar un GUID para el ID del expediente
         ModeloExpediente.ExpedienteID = Guid.NewGuid().ToString();
 
@@ -378,5 +392,6 @@
         navigationManager.NavigateTo("/ListaExpediente");
     }
 }
+
 
 

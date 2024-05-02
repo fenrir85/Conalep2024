@@ -20,7 +20,7 @@
 
 
             <div class="container">
-
+               
                 <div class="form-group">
 
                     <div class="form-group">
@@ -29,7 +29,7 @@
                                 <label>CURP</label>
                             </div>
                             <div class="col-6">
-                                <InputText @bind-Value="ModeloExpediente.CURP" class="form-control" placeholder="" maxlength="18"></InputText>
+                                <InputText @bind-Value="ModeloExpediente.CURP" class="form-control" placeholder="" maxlength="18" style="text-transform:uppercase"></InputText>
 
                                 <ValidationMessage For="() =>ModeloExpediente.CURP"></ValidationMessage>
                             </div>
@@ -44,7 +44,7 @@
                                 <label>RFC</label>
                             </div>
                             <div class="col-6">
-                                <InputText @bind-Value="ModeloExpediente.RFC" class="form-control" placeholder="" maxlength="13"></InputText>
+                                <InputText @bind-Value="ModeloExpediente.RFC" class="form-control" placeholder="" maxlength="13" style="text-transform:uppercase"></InputText>
                                 <ValidationMessage For="() =>ModeloExpediente.RFC"></ValidationMessage>
                             </div>
                         </div>
@@ -205,7 +205,7 @@
                                 <label>NUMERO EXTERIOR</label>
                             </div>
                             <div class="col-6">
-                                <InputNumber @bind-Value="ModeloExpediente.NumeroExterior" class="form-control" placeholder=""></InputNumber>
+                                <InputText @bind-Value="ModeloExpediente.NumeroExterior" class="form-control" placeholder=""></InputText>
                                 <ValidationMessage For="() =>ModeloExpediente.NumeroExterior"></ValidationMessage>
                             </div>
                         </div>
@@ -218,7 +218,7 @@
                                 <label>NUMERO INTERIOR</label>
                             </div>
                             <div class="col-6">
-                                <InputNumber @bind-Value="ModeloExpediente.NumeroInterior" class="form-control" placeholder=""></InputNumber>
+                                <InputText @bind-Value="ModeloExpediente.NumeroInterior" class="form-control" placeholder=""></InputText>
                                 <ValidationMessage For="() =>ModeloExpediente.NumeroInterior"></ValidationMessage>
                             </div>
                         </div>
@@ -373,12 +373,18 @@
 
     protected override async Task OnInitializedAsync()
     {
+
         ModeloExpediente = await Repositorio.GetExpedienteId(ExpedienteID);
+        
     }
 
     //metodo para Editar un registro en tabla utilrenapo
     private async Task ManejadorOnEditarExpediente()
     {
+        
+        ModeloExpediente.CURP = ModeloExpediente.CURP.ToUpper();
+        ModeloExpediente.RFC = ModeloExpediente.RFC.ToUpper();
+
         try
         {
         
