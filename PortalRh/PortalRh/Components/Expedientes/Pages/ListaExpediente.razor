@@ -7,7 +7,9 @@
 <div class="card">
     <div class="card-header">
         <div class="row">
+           
             <div class="col-md-12">
+                <button class="btn btn-success btn-sm" @onclick="@( () => navigationManager.NavigateTo("/CrearExpediente"))"><span class="oi oi-chevron-left" aria-hidden="true"></span> Crear Expediente </button>
                 <h2 class="text-dark text-center">Lista de Expedientes</h2>
             </div>
         </div>
@@ -21,22 +23,16 @@
                     <tr>
 
                         <th>Expediente ID</th>
-                        <th>CURP</th>
+                       
                         <th>RFC</th>
                         <th>Fecha de validación</th>
-                        <th>Primer Apellido</th>
-                        <th>Segundo apellido</th>
+                      
                         <th>Nombre</th>
                         <th>Fecha de nacimiento</th>
                         <th>Sexo</th>
                         <th>Edad</th>
                         <th>Estado</th>
-                        <th>Municipio</th>
-                        <th>Localidad</th>
-                        <th>Calle</th>
-                        <th>Numero Exterior</th>
-                        <th>numero Interior</th>
-                        <th>Codigo Postal</th>
+      
                         <th>Telefono</th>
                         <th>Celular</th>
                         <th>Correo</th>
@@ -55,22 +51,17 @@
                         <tr>
 
                             <td>@expediente.ExpedienteID</td>
-                            <td>@expediente.CURP</td>
+                           
                             <td>@expediente.RFC</td>
                             <td>@expediente.FechaValidacionRFC</td>
-                            <td>@expediente.PrimerApellido</td>
-                            <td>@expediente.SegundoApellido</td>
-                            <td>@expediente.Nombre</td>
+                            <td>@($"{expediente.PrimerApellido} {expediente.SegundoApellido} {expediente.Nombre}")</td>
                             <td>@expediente.FechaNacimiento</td>
                             <td>@expediente.Sexo</td>
                             <td>@expediente.Edad</td>
                             <td>@expediente.Estado</td>
-                            <td>@expediente.Municipio</td>
-                            <td>@expediente.Localidad</td>
-                            <td>@expediente.Calle</td>
-                            <td>@expediente.NumeroExterior</td>
-                            <td>@expediente.NumeroInterior</td>
-                            <td>@expediente.CodigoPostal</td>
+                          
+                   
+                          
                             <td>@expediente.Telefono</td>
                             <td>@expediente.Celular</td>
                             <td>@expediente.Correo</td>
