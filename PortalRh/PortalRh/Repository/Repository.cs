@@ -2,16 +2,34 @@
 
 using PortalRh.Data;
 using PortalRh.Models;
+
+
+
+
 namespace PortalRh.Repository
 {
+
+
     public class Repository : IRepository
     {
         private readonly ApplicationDbContext _contexto;
+        //private readonly ApplicationDbContext2 _contexto2;
+        public async Task<Expediente> GetExpedienteByCURP(string curp)
+        {
+            return await _contexto.Expedientes
+                .FirstOrDefaultAsync(e => e.CURP == curp);
+        }
 
         public Repository(ApplicationDbContext context)
         {
             _contexto = context;
         }
+        
+        //public Repository(ApplicationDbContext context)
+        //{
+        //    _contexto2 = context;
+        //}
+
         public async Task<Expediente> ActualizarExpediente(string ExpedienteId, Expediente actualizarExpediente)
         {
 
@@ -88,6 +106,13 @@ namespace PortalRh.Repository
             return ExpedienteDesdeDb;
         }
     }
+
+
+    
+
+
+
+
 
 
 }

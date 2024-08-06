@@ -57,7 +57,7 @@
                                 <label>FECHA VALIDACIÓN RFC</label>
                             </div>
                             <div class="col-6">
-                                <InputDate @bind-Value="ModeloExpediente.FechaValidacionRFC" class="form-control" placeholder=""></InputDate>
+                                <InputDate @bind-Value="ModeloExpediente.FechaValidacionRFC" class="form-control" placeholder="" disabled></InputDate>
                                 <ValidationMessage For="() =>ModeloExpediente.FechaValidacionRFC"></ValidationMessage>
                             </div>
                         </div>
@@ -322,7 +322,18 @@
                                 <label>GRADO DE ESTUDIOS </label>
                             </div>
                             <div class="col-6">
-                                <InputText @bind-Value="ModeloExpediente.GradoEstudios" class="form-control" placeholder=""></InputText>
+                                <select @bind="ModeloExpediente.GradoEstudios" class="form-control">
+                                   
+                                    <option value="">Seleccionar Grado de estudios</option>
+                                    <option value="Profesional tecnico">Profesional técnico</option>
+                                    <option value="Bachillerato tecnológico ">Bachillerato tecnológico </option>
+                                    <option value="Tecnico superior universitario">Técnico superior universitario</option>
+                                    <option value="Licenciatura">Licenciatura</option>
+                                    <option value="Especialidad">Especialidad</option>
+                                    <option value="Maestría">Maestría</option>
+                                    <option value="Doctorado">Doctorado</option>
+
+                                </select>                               
                                 <ValidationMessage For="() =>ModeloExpediente.GradoEstudios"></ValidationMessage>
                             </div>
                         </div>
@@ -370,6 +381,7 @@
     private Expediente ModeloExpediente = new Expediente();
     [Parameter]
     public string? ExpedienteID { get; set; }
+
 
     protected override async Task OnInitializedAsync()
     {

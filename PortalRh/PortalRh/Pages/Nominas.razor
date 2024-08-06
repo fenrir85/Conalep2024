@@ -1,0 +1,224 @@
+﻿@page "/Nomina/Admistrativa"
+@using Microsoft.EntityFrameworkCore
+@using PortalRh.Data
+@using PortalRh.Models
+@using PortalRh.Repository
+@using PortalRh.Utils
+@using ClosedXML.Excel;
+
+
+@* @inject IJSRuntime JS *@
+@inject IrepositoryMySQL myService;
+@* @inject Repository2 repo; *@
+@inject IJSRuntime _jsServicio;
+@* @inject RegNominasService RegNominasService *@
+@inject IJSRuntime JS
+@inject ApplicationDbContextMySQL dbContext
+
+
+  <h3>ESCOGER NOMINA</h3>
+
+@if (reg_nominas == null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <select @bind="selectedDbTable">
+        @foreach (var recurso in reg_nominas)
+        {
+            <option>@recurso.DbTable</option>
+        }
+    </select>
+
+}
+
+    <div class="bg-info clearfix"></div>
+
+    <div class="container mt-4">
+        <div class="bg-info clearfix py-2 mb-3">
+            <p class="mb-0 text-center font-weight-bold">ARCHIVOS QNALES</p>
+        </div>
+        <div class="btn-group d-flex flex-wrap mb-3" role="group">
+            @* <button @onclick="ExportData">Export to Excel</button> *@
+            <button class="btn btn-primary flex-fill m-1" @onclick="ExportarExcelSerica">SericaExcel</button>
+            <button id="serica" class="btn btn-primary flex-fill m-1" type="button">Serica</button>
+            <button id="serica_sinp" class="btn btn-primary flex-fill m-1" type="button">Serica sin prestamos</button>
+            <button id="serica_p" class="btn btn-primary flex-fill m-1" type="button">Serica Prestamos</button>
+            <button id="serica_i" class="btn btn-primary flex-fill m-1" type="button">Serica Incremento</button>
+            <button id="sipe" class="btn btn-primary flex-fill m-1" type="button">Sipe Sic</button>
+            <button id="cifras" class="btn btn-primary flex-fill m-1" type="button">Cifras Control</button>
+            <button id="fonacot" class="btn btn-primary flex-fill m-1" type="button">Fonacot</button>
+            <button id="fovissste" class="btn btn-primary flex-fill m-1" type="button">Fovissste</button>
+            <button id="terceros" class="btn btn-primary flex-fill m-1" type="button">Pago Terceros</button>
+        </div>
+
+        <div class="bg-info clearfix py-2 mb-3">
+            <p class="mb-0 text-center font-weight-bold">SEFIPLAN PRENOMINA</p>
+        </div>
+        <div class="btn-group d-flex flex-wrap mb-3" role="group">
+            <button id="rsm_sefiplan" class="btn btn-primary flex-fill m-1" type="button">Resumen Sefiplan estatal</button>
+            <button id="rsm_sefiplan2" class="btn btn-primary flex-fill m-1" type="button">Resumen Sefiplan federal</button>
+        </div>
+
+        <div class="bg-info clearfix py-2 mb-3">
+            <p class="mb-0 text-center font-weight-bold">TIMBRADO</p>
+        </div>
+        <div class="btn-group d-flex flex-wrap mb-3" role="group">
+            <button id="rsm_timbrado" class="btn btn-primary flex-fill m-1" type="button">Resumen Timbrado</button>
+        </div>
+
+        <div class="bg-info clearfix py-2 mb-3">
+            <p class="mb-0 text-center font-weight-bold">CONCILIACION FINANCIEROS</p>
+        </div>
+        <div class="btn-group d-flex flex-wrap mb-3" role="group">
+            <button id="rsm_conceptos" class="btn btn-primary flex-fill m-1" type="button">Resumen Conceptos</button>
+            <button id="rsm_conceptos2" class="btn btn-primary flex-fill m-1" type="button">Resumen Conceptos 21-24</button>
+        </div>
+    </div>
+
+
+@code {
+    private List<RegNominasInfo> regNominasInfo;
+    private List<reg_nominas> reg_nominas;
+    private string selectedDbTable;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine("OnInitializedAsync ejecutado");
+        myService.DoSomething();
+        try
+        {
+            reg_nominas = await myService.GetRegNominasDBTableAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error de conexión: " + ex.Message);
+        }
+    }
+
+    private async Task ExportarExcelSerica()
+    {
+        Console.Write("ExportarExcelSerica ejecutado");
+        Console.WriteLine("Valor seleccionado: " + selectedDbTable);
+
+        if (string.IsNullOrEmpty(selectedDbTable))
+        {
+            Console.WriteLine("No se ha seleccionado ninguna tabla.");
+            return;
+        }
+        var list = await myService.GetReportSericaAsync(selectedDbTable);
+        try
+        {
+            using (var book = new XLWorkbook())
+            {
+
+                IXLWorksheet sheet = book.Worksheets.Add("empleados");
+
+                sheet.Cell(1, 1).Value = "ENC0";
+                sheet.Cell(1, 2).Value = "ENC1";
+                sheet.Cell(1, 3).Value = "ENC2";
+                sheet.Cell(1, 4).Value = "IMPORTE_11301";
+                sheet.Cell(1, 5).Value = "IM12201";
+                sheet.Cell(1, 6).Value = "IM12301";
+                sheet.Cell(1, 7).Value = "IM13101";
+                sheet.Cell(1, 8).Value = "IMPORTE_13102";
+                sheet.Cell(1, 9).Value = "IM13401";
+                sheet.Cell(1, 10).Value = "IM13402";
+                sheet.Cell(1, 11).Value = "IM13407";
+                sheet.Cell(1, 12).Value = "IM13408";
+                sheet.Cell(1, 13).Value = "IM13411";
+                sheet.Cell(1, 14).Value = "IMPORTE_15403";
+                sheet.Cell(1, 15).Value = "IMPORTE_15402";
+                sheet.Cell(1, 16).Value = "despensa";
+                sheet.Cell(1, 17).Value = "prestamos";
+                sheet.Cell(1, 18).Value = "superissste";
+                sheet.Cell(1, 19).Value = "ade_medico";
+                sheet.Cell(1, 20).Value = "CHC";
+                sheet.Cell(1, 21).Value = "pension";
+                sheet.Cell(1, 22).Value = "faltas";
+                sheet.Cell(1, 23).Value = "retardos";
+                sheet.Cell(1, 24).Value = "TOT_PERC";
+                sheet.Cell(1, 25).Value = "tot_dedu";
+                sheet.Cell(1, 26).Value = "tot_neto";
+
+                for (int row = 1; row <= list.Count; row++)
+                {
+
+                    sheet.Cell(row + 1, 1).Value = list[row - 1].ENC0;
+                    sheet.Cell(row + 1, 2).Value = list[row - 1].ENC1;
+                    sheet.Cell(row + 1, 3).Value = list[row - 1].ENC2;
+                    sheet.Cell(row + 1, 4).Value = list[row - 1].IMPORTE_11301;
+                    sheet.Cell(row + 1, 5).Value = list[row - 1].IM12201;
+                    sheet.Cell(row + 1, 6).Value = list[row - 1].IM12301;
+                    sheet.Cell(row + 1, 7).Value = list[row - 1].IM13101;
+                    sheet.Cell(row + 1, 8).Value = list[row - 1].IMPORTE_13102;
+                    sheet.Cell(row + 1, 9).Value = list[row - 1].IM13401;
+                    sheet.Cell(row + 1, 10).Value = list[row - 1].IM13402;
+                    sheet.Cell(row + 1, 11).Value = list[row - 1].IM13407;
+                    sheet.Cell(row + 1, 12).Value = list[row - 1].IM13408;
+                    sheet.Cell(row + 1, 13).Value = list[row - 1].IM13411;
+                    sheet.Cell(row + 1, 14).Value = list[row - 1].IMPORTE_15403;
+                    sheet.Cell(row + 1, 15).Value = list[row - 1].IMPORTE_15402;
+                    sheet.Cell(row + 1, 16).Value = list[row - 1].despensa;
+                    sheet.Cell(row + 1, 17).Value = list[row - 1].prestamos;
+                    sheet.Cell(row + 1, 18).Value = list[row - 1].superissste;
+                    sheet.Cell(row + 1, 19).Value = list[row - 1].ade_medico;
+                    sheet.Cell(row + 1, 20).Value = list[row - 1].CHC;
+                    sheet.Cell(row + 1, 21).Value = list[row - 1].pension;
+                    sheet.Cell(row + 1, 22).Value = list[row - 1].faltas;
+                    sheet.Cell(row + 1, 23).Value = list[row - 1].retardos;
+                    sheet.Cell(row + 1, 24).Value = list[row - 1].TOT_PERC;
+                    sheet.Cell(row + 1, 25).Value = list[row - 1].tot_dedu;
+                    sheet.Cell(row + 1, 26).Value = list[row - 1].tot_neto;
+                }
+
+                using (var memoria = new MemoryStream())
+                {
+                    book.SaveAs(memoria);
+                    var nombreExcel = string.Concat("Reporte ", DateTime.Now.ToString(), ".xlsx");
+
+                    await _jsServicio.InvokeAsync<object>(
+                        "DescargarExcel",
+                        nombreExcel,
+                        Convert.ToBase64String(memoria.ToArray())
+                    );
+                }
+                Console.Write("ExportarExcelSerica termino de ejecurtarse ");
+            }
+
+
+        }
+        catch (Exception ex)
+        {
+            Console.Write(ex);
+        }
+    }
+
+
+    // private async Task ExportData()
+    // {
+    //     var data = await RegNominasService.GetRegNominasInfoAsync();
+    //     await RegNominasService.ExportToExcelAsync(data, JS);
+    // }
+    // private async Task ExportData()
+    // {
+    //     var data = await RegNominasService.GetRegNominasInfoAsync();
+    //     await dbContext.ExportToExcelAsync(data, JS);
+    // }
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     try
+    //     {
+    //         // regNominasInfo = await RegNominasService.GetRegNominasInfoAsync();
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine("Error de conexión: " + ex.Message);
+    //     }
+    // }
+
+
+ 
+}
