@@ -1,0 +1,92 @@
+﻿@* <h3>ReporteSerica</h3>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+
+        try
+        {
+            using (var book = new XLWorkbook())
+            {
+
+                IXLWorksheet sheet = book.Worksheets.Add("empleados");
+
+                sheet.Cell(1, 1).Value = "ENC0";
+                sheet.Cell(1, 2).Value = "ENC1";
+                sheet.Cell(1, 3).Value = "ENC2";
+                sheet.Cell(1, 4).Value = "IMPORTE_11301";
+                sheet.Cell(1, 5).Value = "IM12201";
+                sheet.Cell(1, 6).Value = "IM12301";
+                sheet.Cell(1, 7).Value = "IM13101";
+                sheet.Cell(1, 8).Value = "IMPORTE_13102";
+                sheet.Cell(1, 9).Value = "IM13401";
+                sheet.Cell(1, 10).Value = "IM13402";
+                sheet.Cell(1, 11).Value = "IM13407";
+                sheet.Cell(1, 12).Value = "IM13408";
+                sheet.Cell(1, 13).Value = "IM13411";
+                sheet.Cell(1, 14).Value = "IMPORTE_15403";
+                sheet.Cell(1, 15).Value = "IMPORTE_15402";
+                sheet.Cell(1, 16).Value = "despensa";
+                sheet.Cell(1, 17).Value = "prestamos";
+                sheet.Cell(1, 18).Value = "superissste";
+                sheet.Cell(1, 19).Value = "ade_medico";
+                sheet.Cell(1, 20).Value = "CHC";
+                sheet.Cell(1, 21).Value = "pension";
+                sheet.Cell(1, 22).Value = "faltas";
+                sheet.Cell(1, 23).Value = "retardos";
+                sheet.Cell(1, 24).Value = "TOT_PERC";
+                sheet.Cell(1, 25).Value = "tot_dedu";
+                sheet.Cell(1, 26).Value = "tot_neto";
+
+                for (int row = 1; row <= list.Count; row++)
+                {
+
+                    sheet.Cell(row + 1, 1).Value = list[row - 1].ENC0;
+                    sheet.Cell(row + 1, 2).Value = list[row - 1].ENC1;
+                    sheet.Cell(row + 1, 3).Value = list[row - 1].ENC2;
+                    sheet.Cell(row + 1, 4).Value = list[row - 1].IMPORTE_11301;
+                    sheet.Cell(row + 1, 5).Value = list[row - 1].IM12201;
+                    sheet.Cell(row + 1, 6).Value = list[row - 1].IM12301;
+                    sheet.Cell(row + 1, 7).Value = list[row - 1].IM13101;
+                    sheet.Cell(row + 1, 8).Value = list[row - 1].IMPORTE_13102;
+                    sheet.Cell(row + 1, 9).Value = list[row - 1].IM13401;
+                    sheet.Cell(row + 1, 10).Value = list[row - 1].IM13402;
+                    sheet.Cell(row + 1, 11).Value = list[row - 1].IM13407;
+                    sheet.Cell(row + 1, 12).Value = list[row - 1].IM13408;
+                    sheet.Cell(row + 1, 13).Value = list[row - 1].IM13411;
+                    sheet.Cell(row + 1, 14).Value = list[row - 1].IMPORTE_15403;
+                    sheet.Cell(row + 1, 15).Value = list[row - 1].IMPORTE_15402;
+                    sheet.Cell(row + 1, 16).Value = list[row - 1].despensa;
+                    sheet.Cell(row + 1, 17).Value = list[row - 1].prestamos;
+                    sheet.Cell(row + 1, 18).Value = list[row - 1].superissste;
+                    sheet.Cell(row + 1, 19).Value = list[row - 1].ade_medico;
+                    sheet.Cell(row + 1, 20).Value = list[row - 1].CHC;
+                    sheet.Cell(row + 1, 21).Value = list[row - 1].pension;
+                    sheet.Cell(row + 1, 22).Value = list[row - 1].faltas;
+                    sheet.Cell(row + 1, 23).Value = list[row - 1].retardos;
+                    sheet.Cell(row + 1, 24).Value = list[row - 1].TOT_PERC;
+                    sheet.Cell(row + 1, 25).Value = list[row - 1].tot_dedu;
+                    sheet.Cell(row + 1, 26).Value = list[row - 1].tot_neto;
+                }
+
+                using (var memoria = new MemoryStream())
+                {
+                    book.SaveAs(memoria);
+                    var nombreExcel = string.Concat("Reporte ", DateTime.Now.ToString(), ".xlsx");
+
+                    await _jsServicio.InvokeAsync<object>(
+                        "DescargarExcel",
+                        nombreExcel,
+                        Convert.ToBase64String(memoria.ToArray())
+                    );
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error de conexión: " + ex.Message);
+        }
+    }
+//     
+}
+ *@

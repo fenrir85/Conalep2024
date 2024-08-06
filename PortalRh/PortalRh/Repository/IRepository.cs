@@ -5,6 +5,7 @@ namespace PortalRh.Repository
 {
     public interface IRepository
     {
+        Task<Expediente> GetExpedienteByCURP(string curp);
         public Task<List<Expediente>> GetExpediente();
         public Task<Expediente> GetExpedienteId(string ExpedienteId);
         public Task<Expediente> CrearExpediente(Expediente crearExpediente);

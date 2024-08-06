@@ -1,0 +1,74 @@
+﻿@page "/prueba"
+@* 
+@inject IJSRuntime JSRuntime
+
+<h3>Upload Excel File</h3>
+
+<input type="file" @onchange="HandleFileChange" />
+
+@if (excelData != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                @foreach (var column in excelData.First().Cells)
+                {
+                    <th>@column</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in excelData.Skip(1)) // Skip header row
+            {
+                <tr>
+                    @foreach (var cell in row.Cells)
+                    {
+                        <td>@cell</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    List<ExcelRow> excelData;
+
+    async Task HandleFileChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        if (file != null)
+        {
+            using (var stream = file.OpenReadStream())
+            {
+                using (var package = new OfficeOpenXml.ExcelPackage(stream))
+                {
+                    var worksheet = package.Workbook.Worksheets.FirstOrDefault();
+
+                    if (worksheet != null)
+                    {
+                        excelData = new List<ExcelRow>();
+
+                        for (int row = 1; row <= worksheet.Dimension.End.Row; row++)
+                        {
+                            var excelRow = new ExcelRow();
+                            for (int col = 1; col <= worksheet.Dimension.End.Column; col++)
+                            {
+                                var cellValue = worksheet.Cells[row, col].Value?.ToString();
+                                excelRow.Cells.Add(cellValue);
+                            }
+                            excelData.Add(excelRow);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public class ExcelRow
+    {
+        public List<string> Cells { get; set; } = new List<string>();
+    }
+}
+ *@
