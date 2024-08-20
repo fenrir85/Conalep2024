@@ -4,10 +4,11 @@ using System.Numerics;
 namespace PortalRh.Models
 {
     [Keyless]
-    public class SericaReporteModel
+    public class SericaHeaderModel
     {
-      
+        public string TI { get; set; }
         public string ENC0 { get; set; }
+        public string FechaPago { get; set; }
         public string ENC1 { get; set; }
         public int ENC2 { get; set; }
         public decimal IMPORTE_11301 { get; set; }
