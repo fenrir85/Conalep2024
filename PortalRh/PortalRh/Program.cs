@@ -35,7 +35,8 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
 //builder.Services.AddTransient<MySqlDataService>();
 //builder.Services.AddScoped<RegNominasService>();
-builder.Services.AddTransient<SericaReporteModel>();
+builder.Services.AddTransient<SericaHeaderModel>();
+builder.Services.AddTransient<SericaDetalleReporteModel>();
 
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 builder.Services.AddTransient<IRepository, Repository>();
@@ -43,6 +44,7 @@ builder.Services.AddTransient<IrepositoryMySQL, RepositoryMySQL>();
 
 
 builder.Services.AddBlazorDownloadFile();
+
 
 AddBlazorise(builder.Services);
 

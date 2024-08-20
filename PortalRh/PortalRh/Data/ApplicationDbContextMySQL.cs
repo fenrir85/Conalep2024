@@ -19,13 +19,6 @@ namespace PortalRh.Data
             _configuration = configuration;
         }
 
-        public void DoSomething()
-        {
-            // Obtener la cadena de conexión
-            string connectionString = _configuration.GetConnectionString("MysqlConnection");
-            // Usar la cadena de conexión
-            Console.WriteLine(connectionString);
-        }
     }
     public class ApplicationDbContextMySQL : IdentityDbContext
     {
@@ -34,10 +27,9 @@ namespace PortalRh.Data
         {
         }
 
-
         public DbSet<reg_nominas> reg_nominas { get; set; }
-        public DbSet<SericaReporteModel> sericaReporteModels { get; set; }
-  
+        public DbSet<SericaHeaderModel> sericaReporteModels { get; set; }
+        public DbSet<SericaDetalleReporteModel> sericaDetalleReporteModels { get; set; }
 
 
     }

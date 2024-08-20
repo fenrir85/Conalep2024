@@ -1,4 +1,5 @@
-﻿function DescargarExcel(nombreArchivo, base64Archivo) {
+﻿
+function DownloadExcel(nombreArchivo, base64Archivo) {
 
     const link = document.createElement("a");
     link.download = nombreArchivo;
@@ -11,3 +12,12 @@
     link.click();
     document.body.removeChild(link);
 }
+function DownloadTxt(nombre, contenidoBase64) {
+    var link = document.createElement('a');
+    link.download = nombre;
+    link.href = 'data:text/plain;base64,' + contenidoBase64;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+

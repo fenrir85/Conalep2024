@@ -5,7 +5,6 @@
 @using PortalRh.Repository
 @using PortalRh.Utils
 
-
 @* @inject IJSRuntime JS *@
 @inject IrepositoryMySQL myService;
 @* @inject Repository2 repo; *@
@@ -22,9 +21,9 @@
 else
 {
     <select @bind="selectedDbTable">
-        @foreach (var recurso in reg_nominas)
+        @foreach (var resource in reg_nominas)
         {
-            <option>@recurso.DbTable</option>
+            <option>@resource.DbTable</option>
         }
     </select>
 
@@ -40,7 +39,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        myService.DoSomething();
+        // myService.DoSomething();
         try
         {
          reg_nominas = await myService.GetRegNominasDBTableAsync();
@@ -60,7 +59,7 @@ else
             Console.WriteLine("No se ha seleccionado ninguna tabla.");
             return;
         }
-        var list = await myService.GetReportSericaAsync(selectedDbTable);
+        var list = await myService.GetHeaderSericaPrestamoAsync(selectedDbTable);
         try
         {
             using (var book = new XLWorkbook())
@@ -97,33 +96,33 @@ else
 
              for (int row = 1; row <= list.Count; row++)
               {
-
-                  sheet.Cell(row + 1, 1).Value = list[row - 1].ENC0;
-                  sheet.Cell(row + 1, 2).Value = list[row - 1].ENC1;
-                  sheet.Cell(row + 1, 3).Value = list[row - 1].ENC2;
-                  sheet.Cell(row + 1, 4).Value = list[row - 1].IMPORTE_11301;
-                  sheet.Cell(row + 1, 5).Value = list[row - 1].IM12201;
-                  sheet.Cell(row + 1, 6).Value = list[row - 1].IM12301;
-                  sheet.Cell(row + 1, 7).Value = list[row - 1].IM13101;
-                  sheet.Cell(row + 1, 8).Value = list[row - 1].IMPORTE_13102;
-                  sheet.Cell(row + 1, 9).Value = list[row - 1].IM13401;
-                  sheet.Cell(row + 1, 10).Value = list[row - 1].IM13402;
-                  sheet.Cell(row + 1, 11).Value = list[row - 1].IM13407;
-                  sheet.Cell(row + 1, 12).Value = list[row - 1].IM13408;
-                  sheet.Cell(row + 1, 13).Value = list[row - 1].IM13411;
-                  sheet.Cell(row + 1, 14).Value = list[row - 1].IMPORTE_15403;
-                  sheet.Cell(row + 1, 15).Value = list[row - 1].IMPORTE_15402;
-                  sheet.Cell(row + 1, 16).Value = list[row - 1].despensa;
-                  sheet.Cell(row + 1, 17).Value = list[row - 1].prestamos;
-                  sheet.Cell(row + 1, 18).Value = list[row - 1].superissste;
-                  sheet.Cell(row + 1, 19).Value = list[row - 1].ade_medico;
-                  sheet.Cell(row + 1, 20).Value = list[row - 1].CHC;
-                  sheet.Cell(row + 1, 21).Value = list[row - 1].pension;
-                  sheet.Cell(row + 1, 22).Value = list[row - 1].faltas;
-                  sheet.Cell(row + 1, 23).Value = list[row - 1].retardos;
-                  sheet.Cell(row + 1, 24).Value = list[row - 1].TOT_PERC;
-                  sheet.Cell(row + 1, 25).Value = list[row - 1].tot_dedu;
-                  sheet.Cell(row + 1, 26).Value = list[row - 1].tot_neto;
+                    var item = list[row - 1];
+                  sheet.Cell(row + 1, 1).Value = item.ENC0;
+                  sheet.Cell(row + 1, 2).Value = item.ENC1;
+                  sheet.Cell(row + 1, 3).Value = item.ENC2;
+                  sheet.Cell(row + 1, 4).Value = item.IMPORTE_11301;
+                  sheet.Cell(row + 1, 5).Value = item.IM12201;
+                  sheet.Cell(row + 1, 6).Value = item.IM12301;
+                  sheet.Cell(row + 1, 7).Value = item.IM13101;
+                  sheet.Cell(row + 1, 8).Value = item.IMPORTE_13102;
+                  sheet.Cell(row + 1, 9).Value = item.IM13401;
+                  sheet.Cell(row + 1, 10).Value = item.IM13402;
+                  sheet.Cell(row + 1, 11).Value = item.IM13407;
+                  sheet.Cell(row + 1, 12).Value = item.IM13408;
+                  sheet.Cell(row + 1, 13).Value = item.IM13411;
+                  sheet.Cell(row + 1, 14).Value = item.IMPORTE_15403;
+                  sheet.Cell(row + 1, 15).Value = item.IMPORTE_15402;
+                  sheet.Cell(row + 1, 16).Value = item.despensa;
+                  sheet.Cell(row + 1, 17).Value = item.prestamos;
+                  sheet.Cell(row + 1, 18).Value = item.superissste;
+                  sheet.Cell(row + 1, 19).Value = item.ade_medico;
+                  sheet.Cell(row + 1, 20).Value = item.CHC;
+                  sheet.Cell(row + 1, 21).Value = item.pension;
+                  sheet.Cell(row + 1, 22).Value = item.faltas;
+                  sheet.Cell(row + 1, 23).Value = item.retardos;
+                  sheet.Cell(row + 1, 24).Value = item.TOT_PERC;
+                  sheet.Cell(row + 1, 25).Value = item.tot_dedu;
+                  sheet.Cell(row + 1, 26).Value = item.tot_neto;
              }
 
                 using (var memoria = new MemoryStream())
@@ -132,7 +131,7 @@ else
                     var nombreExcel = string.Concat("Reporte ", DateTime.Now.ToString(), ".xlsx");
 
                     await _jsServicio.InvokeAsync<object>(
-                        "DescargarExcel",
+                        "DownloadExcel",
                         nombreExcel,
                         Convert.ToBase64String(memoria.ToArray())
                     );
