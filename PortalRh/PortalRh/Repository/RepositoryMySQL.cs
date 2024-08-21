@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MySql.Data.MySqlClient;
 using PortalRh.Data;
 using PortalRh.Models;
@@ -20,20 +21,14 @@ namespace PortalRh.Repository
         public async Task<List<RegNominasInfo>> GetRegNominasInfoAsync()
         {
             var result = new List<RegNominasInfo>();
-            var query = @"
-                SELECT 
-                    CONCAT_WS('|', r.DbTable, r.Qna, r.Year, r.Descripcion, r.FecPago) AS Info
-                FROM 
-                    reg_nominas r
-                WHERE 
-                    r.Status = 1;
-            ";
-            Console.Write(query);
-            using (var connection = (MySqlConnection)_contexto2.Database.GetDbConnection())
+            var connectionString = _connectionString;
+         
+            using (var connection = new MySqlConnection(connectionString))
             {
                 await connection.OpenAsync();
-                using (var command = new MySqlCommand(query, connection))
+                using (var command = new MySqlCommand("GetRegNominasInfo", connection))
                 {
+                    command.CommandType = CommandType.StoredProcedure;
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
@@ -53,21 +48,14 @@ namespace PortalRh.Repository
         {
             var connectionString = _connectionString;
             var result = new List<reg_nominas>();
-            var query = @"
-        SELECT 
-            DbTable
-        FROM 
-            reg_nominas r
-        WHERE 
-            r.Status = 1;
-    ";
-
-           
+      
             using (var connection = new MySqlConnection(connectionString))
             {
                 await connection.OpenAsync();
-                using (var command = new MySqlCommand(query, connection))
+             
+                using (var command = new MySqlCommand("GetRegNominasDBTable", connection))
                 {
+                    command.CommandType = CommandType.StoredProcedure;
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
@@ -83,179 +71,21 @@ namespace PortalRh.Repository
 
             return result;
         }
-
       
         public async Task<List<SericaHeaderModel>> GetHeaderSericaPrestamoAsync(string tabla)
         {
             var connectionString = _connectionString;
             var result = new List<SericaHeaderModel>();
-            var query = @"
-            SELECT 'C' as ENC0,
-           '4212300' as ENC1,count(TIPO) as ENC2,
-            DATE_FORMAT(STR_TO_DATE(FEC_PAGO, '%d/%m/%Y'), '%Y%m%d') AS FechaPago,
-            0 as IMPORTE_11301,
-            0 as IM12201,
-            0 as IM12301,
-            0 as IM13101,
-            0 as IMPORTE_13102,
-            0 as IM13401,
-            0 as IM13402,
-            0 as IM13407,
-            0 as IM13408,
-            0 as IM13411,
-            0 as IMPORTE_15403,
-            0 as IMPORTE_15402,
-            0 as despensa,
-            sum(prestamos) as prestamos,
-            0 as superissste,
-            0 as ade_medico,
-            0 as CHC,
-            0 as pension,
-            0 as faltas,
-            0 as retardos,
-            0 as TOT_PERC,
-            sum(prestamos) as tot_dedu,
-            0 as tot_neto
-
-            from
-            (SELECT
-	            'D' AS TIPO,
-	            IF(confronta.nss is null,siri.nss,confronta.nss) as nss,
-	            trim(nomina.nombre) as NOMBRE,
-	            trim(nomina.ape_pat) as APE_PAT,
-	            trim(nomina.ape_mat) as APE_MAT,
-	            nomina.rfc,
-	            nomina.curp,
-            IF
-	            ( SUBSTR( nomina.curp, 11, 1 ) = 'H', 'M', 'F' ) AS sexo,
-	            '4212300' AS pagaduria,
-	            siri.no_emple,
-	            '9999999999' AS NUM_CHEQ,
-	            CASE confronta.regimen_pensionario 
-	            WHEN 'CUENTAS INDIVIDUALES' THEN
-		            2
-	            WHEN 'DECIMO TRANSITORIO' THEN
-		            1
-            END AS Regimen_ISSSTE,
-
-            CASE
-	            nomina.tipo 
-	            WHEN 'ADM' THEN
-	            2 
-	            WHEN 'DOC' THEN
-	            3 
-	            WHEN 'HON' THEN
-	            5 
-	            END AS TIPO_CONTRATO,
-	            nomina.tot_perc,
-	            nomina.tot_dedu,
-	            '11301' AS PARTIDA_11301,
-              'P001A' AS CONCEPTO_11301,
-              if(P001A>0,P001A,if( p001a = 0 and  tipo='DOC' and P001B>0,P001B,0)) AS IMPORTE_11301,
-	            '' AS PT12201,
-	            '' AS CP12201,
-	            '' AS IM12201,
-	            '' AS PT12301,
-	            '' AS CP12301,
-	            '' AS IM12301,
-	            '' AS PT13101,
-	            '' AS CP13101,
-	            '' AS IM13101,
-	            '13102' AS PARTIDA_13102,
-              'P022A' AS CONCEPTO_13102,
-               P022A+P016K AS IMPORTE_13102,
-	             '' AS IPT13401,
-	             '' AS ICP13401,
-	             '' AS IM13401,
-	             '' AS IPT13402,
-	             '' AS ICP13402,
-	             '' AS IM13402,
-	             '' AS IPT13407,
-	             '' AS ICP13407,
-	             '' AS IM13407,
-	             '' AS IPT13408,
-	             '' AS ICP13408,
-	             '' AS IM13408,
-	             '' AS IPT13411,
-	             '' AS ICP13411,
-	             '' AS IM13411,
-	
-	 
-	             '15403' AS PARTIDA_15403,
-              'P016D' AS CONCEPTO_15403,
-               P016D+P016E AS IMPORTE_15403,
-	 
-	             '15402' AS PARTIDA_15402,
-              'P016A' AS CONCEPTO_15402,
-               P016A AS IMPORTE_15402,
-            #------------ BIEN -----------------------	 
-		            '10001' AS PARTIDA_10001,
-		            'PERCEP' AS CONCEPTO_10001,
-		            round(P001A+P001B+P001C+P001D+P001E+P002A+P010A+P016C+P016F+P016G+P016H+P016I+P016J+P016L+
-		            +P016M+P016N+P021A+P023A+P034A+P035A+P038A+P038B+P038C+P038D+P038E+P038F+P038G+P038H+P038I+P038J+P038K+
-		            +P038L+P039A,2)  as IMPORTE_10001,
-
-	             '10002' AS PARTIDA_10002,
-	             'P016B' AS CONCEPTO_10002,
-	              P016B AS IMPORTE_10002,
-		
-
-
-            '20001' AS PARTIDA_20001,
-            'DEDUC' AS CONCEPTO_20001,
-            round(D001A+D001B+D001C+D001D+D001E+D002A+D004B+D004C+D004D+D004E+D004F+D004G+D004H+
-            +D004I+D009B+D011A+D012A+D013A+D014A+D019A+D019B,2) AS IMPORTE_20001,
-		
-	          '20002' AS PARTIDA_20002,
-              'D004A' AS CONCEPTO_20002,
-               D004A AS IMPORTE_20002,
-	 
-	             '' as PT20003,
-	             '' as CP20003,
-	             '' as IM20003,
-	             '' as PT20004,
-	             '' as CP20004,
-	             '' as IM20004,
-
-	 
-	            '20005' AS PARTIDA_20005,
-              'D009A' AS CONCEPTO_20005,
-               D009A+D009C AS IMPORTE_20005,
-	 
-	            '20006' AS PARTIDA_20006,
-              'D007A' AS CONCEPTO_20006,
-               D007A AS IMPORTE_20006,
-	 
-	            '20007' AS PARTIDA_20007,
-              'D020A' AS CONCEPTO_20007,
-               D020A AS IMPORTE_20007,
-	 
-	             '' as PT20008,
-	             '' as CP20008,
-	             '' as IM20008,
-
-	             round(TOT_PERC-TOT_DEDU,2)  as TOT_NETO,
-	             round(SDOBAS_ISS)  as SDO_ISS ,
-	             P016B as despensa,
-	             D004A as prestamos,
-		            D009A+D009C as CHC,
-		            D007A as pension,
-		            FEC_PAGO,QNA_PAGO
-            FROM
-	            (select * from " + tabla+@" where d004a >0) nomina
-	            LEFT JOIN siri_vigente siri ON siri.rfc = nomina.rfc
-	            left join confronta on confronta.curp = nomina.curp 
-	            where p001a > 0 or ( p001a = 0 and  tipo='DOC' and P001B>0)
-	            )  as resumen
-	            GROUP BY QNA_PAGO;
-    ";
-           
+         
             using (var connection = new MySqlConnection(connectionString))
             
             {
                 await connection.OpenAsync();
-                using (var command = new MySqlCommand(query, connection))
+
+                using (var command = new MySqlCommand("GetHeaderSericaPrestamo", connection))
                 {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@tabla", tabla);
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
@@ -297,155 +127,23 @@ namespace PortalRh.Repository
 
             return result;
         }
-        //ESTE
+
         public async Task<List<SericaDetalleReporteModel>> GetSericaPrestamoAsync(string tabla)
         {
             var connectionString = _connectionString;
             var result = new List<SericaDetalleReporteModel>();
-            var query = @"
-                SELECT
-	            'D' AS TI,
-	            IF(confronta.nss is null,siri.nss,confronta.nss) as NSS,
-	            trim(nomina.nombre) as NOMBRE,
-	            trim(nomina.ape_pat) as APE_PAT,
-	            trim(nomina.ape_mat) as APE_MAT,
-	            nomina.rfc as RFC,
-	            nomina.curp as CURP,
-            IF
-	            ( SUBSTR( nomina.curp, 11, 1 ) = 'H', 'M', 'F' ) AS SEXO,
-	            '4212300' AS PAGADURIA,
-	            siri.no_emple as NO_EMPLE,
-	            '9999999999' AS NUM_CHEQ,
-	            CASE confronta.regimen_pensionario 
-	            WHEN 'CUENTAS INDIVIDUALES' THEN
-		            2
-	            WHEN 'DECIMO TRANSITORIO' THEN
-		            1
-            END AS REGIMEN_ISSSTE,
-
-	
-	
-            CASE
-	            nomina.tipo 
-	            WHEN 'ADM' THEN
-	            2 
-	            WHEN 'DOC' THEN
-	            3 
-	            WHEN 'HON' THEN
-	            5 
-	            END AS TIPO_CONTRATO,
-	            0 as TOT_PERC,
-	            d004a as TOT_DEDU,
-	            '11301' AS PARTIDA_11301,
-              'P001A' AS CONCEPTO_11301,
-              0 AS IMPORTE_11301,
-	            '' AS PT12201,
-	            '' AS CP12201,
-	            '' AS IM12201,
-	            '' AS PT12301,
-	            '' AS CP12301,
-	            '' AS IM12301,
-	            '' AS PT13101,
-	            '' AS CP13101,
-	            '' AS IM13101,
-	            '13102' AS PARTIDA_13102,
-              'P022A' AS CONCEPTO_13102,
-               0 AS IMPORTE_13102,
-	             '' AS IPT13401,
-	             '' AS ICP13401,
-	             '' AS IM13401,
-	             '' AS IPT13402,
-	             '' AS ICP13402,
-	             '' AS IM13402,
-	             '' AS IPT13407,
-	             '' AS ICP13407,
-	             '' AS IM13407,
-	             '' AS IPT13408,
-	             '' AS ICP13408,
-	             '' AS IM13408,
-	             '' AS IPT13411,
-	             '' AS ICP13411,
-	             '' AS IM13411,
-	
-	 
-	             '15403' AS PARTIDA_15403,
-              'P016D' AS CONCEPTO_15403,
-               0 AS IMPORTE_15403,
-	 
-	             '15402' AS PARTIDA_15402,
-              'P016A' AS CONCEPTO_15402,
-               0 AS IMPORTE_15402,
-            #------------ BIEN -----------------------	 
-		            '10001' AS PARTIDA_10001,
-		            'PERCEP' AS CONCEPTO_10001,
-	             0 as  IMPORTE_10001,
-
-	             '10002' AS PARTIDA_10002,
-	             'P016B' AS CONCEPTO_10002,
-	              0 AS IMPORTE_10002,
-		
-
-
-            '20001' AS PARTIDA_20001,
-            'DEDUC' AS CONCEPTO_20001,
-            0 AS IMPORTE_20001,
-
-		
-	            '20002' AS PARTIDA_20002,
-              'D004A' AS CONCEPTO_20002,
-               D004A AS IMPORTE_20002,
-	 
-	             '' as PT20003,
-	             '' as CP20003,
-	             '' as IM20003,
-	             '' as PT20004,
-	             '' as CP20004,
-	             '' as IM20004,
-
-	 
-	            '20005' AS PARTIDA_20005,
-              'D009A' AS CONCEPTO_20005,
-               0 AS IMPORTE_20005,
-	 
-	            '20006' AS PARTIDA_20006,
-              'D007A' AS CONCEPTO_20006,
-               0 AS IMPORTE_20006,
-	 
-	            '20007' AS PARTIDA_20007,
-              'D020A' AS CONCEPTO_20007,
-               0 AS IMPORTE_20007,
-	 
-	             '' as PT20008,
-	             '' as CP20008,
-	             '' as IM20008,
-
-	             0  as TOT_NETO,
-	             round(SDOBAS_ISS)  as SDO_ISS ,
-	             P016B as despensa,
-	             D004A as prestamos,
-		            D009A+D009C as CHC,
-		            D007A as pension,
-		            0 as TOT_PERC,
-		            d004a as TOT_DEDU,
-		            TOT_NETO,TIPO
-            FROM
-	            (SELECT * from "+tabla+@" where d004a>0) 	nomina
-	            LEFT JOIN siri_vigente siri ON siri.rfc = nomina.rfc
-	            left join confronta on confronta.curp = nomina.curp 
-	            where p001a > 0 or ( p001a = 0 and  tipo='DOC' and P001B>0)
-            ORDER BY CURP";
-
-            //Console.WriteLine(query);
 
             using (var connection = new MySqlConnection(connectionString))
             {
                 await connection.OpenAsync();
 
-                using (var command = new MySqlCommand(query, connection))
+          
+                using (var command = new MySqlCommand("GetSericaPrestamos", connection))
                 {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@tabla", tabla);
                     command.Parameters.AddWithValue("@sueldo", "sueldo");
-                 
-
+         
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         try
@@ -556,180 +254,21 @@ namespace PortalRh.Repository
             }
             return result;
         }
-        //sin prestamo
-
+     
         public async Task<List<SericaHeaderModel>> GetHeaderSericaSinPrestamo(string tabla)
         {
             var connectionString = _connectionString;
             var result = new List<SericaHeaderModel>();
-            var query = @"
-           SELECT
-	            'C' AS ENC0,
-	            DATE_FORMAT( STR_TO_DATE( FEC_PAGO, '%d/%m/%Y' ), '%Y%m%d' ) AS FechaPago,
-	            '4212300' AS ENC1,
-	            count( TIPO ) AS ENC2,
-	            sum( IMPORTE_11301 ) AS IMPORTE_11301,
-	            sum( IM12201 ) AS IM12201,
-	            sum( IM12301 ) AS IM12301,
-	            sum( IM13101 ) AS IM13101,
-	            sum( IMPORTE_13102 ) AS IMPORTE_13102,
-	            sum( IM13401 ) AS IM13401,
-	            sum( IM13402 ) AS IM13402,
-	            sum( IM13407 ) AS IM13407,
-	            sum( IM13408 ) AS IM13408,
-	            sum( IM13411 ) AS IM13411,
-	            sum( IMPORTE_15403 ) AS IMPORTE_15403,
-	            sum( IMPORTE_15402 ) AS IMPORTE_15402,
-	            sum( despensa ) AS despensa,
-	            0 AS prestamos,
-	            0 AS superissste,
-	            0 AS ade_medico,
-	            sum( CHC ) AS CHC,
-	            sum( pension ) AS pension,
-	            sum( IMPORTE_20007 ) AS faltas,
-	            0 AS retardos,
-	            ROUND( sum( TOT_PERC ), 2 ) AS TOT_PERC,
-	            sum( tot_dedu )- sum( prestamos ) AS tot_dedu,
-	            sum( tot_neto ) AS tot_neto 
-            FROM
-	            (
-	            SELECT
-		            'D' AS TIPO,
-	            IF
-		            ( confronta.nss IS NULL, siri.nss, confronta.nss ) AS nss,
-		            trim( nomina.nombre ) AS NOMBRE,
-		            trim( nomina.ape_pat ) AS APE_PAT,
-		            trim( nomina.ape_mat ) AS APE_MAT,
-		            nomina.rfc,
-		            nomina.curp,
-	            IF
-		            ( SUBSTR( nomina.curp, 11, 1 ) = 'H', 'M', 'F' ) AS sexo,
-		            '4212300' AS pagaduria,
-		            siri.no_emple,
-		            '9999999999' AS NUM_CHEQ,
-	            CASE
-			            confronta.regimen_pensionario 
-			            WHEN 'CUENTAS INDIVIDUALES' THEN
-			            2 
-			            WHEN 'DECIMO TRANSITORIO' THEN
-			            1 
-		            END AS Regimen_ISSSTE,
-	            CASE
-			            nomina.tipo 
-			            WHEN 'ADM' THEN
-			            2 
-			            WHEN 'DOC' THEN
-			            3 
-			            WHEN 'HON' THEN
-			            5 
-		            END AS TIPO_CONTRATO,
-		            nomina.tot_perc,
-		            nomina.tot_dedu,
-		            '11301' AS PARTIDA_11301,
-		            'P001A' AS CONCEPTO_11301,
-	            IF
-		            (
-			            P001A > 0,
-			            P001A,
-		            IF
-		            ( p001a = 0 AND tipo = 'DOC' AND P001B > 0, P001B, 0 )) AS IMPORTE_11301,
-		            '' AS PT12201,
-		            '' AS CP12201,
-		            '' AS IM12201,
-		            '' AS PT12301,
-		            '' AS CP12301,
-		            '' AS IM12301,
-		            '' AS PT13101,
-		            '' AS CP13101,
-		            '' AS IM13101,
-		            '13102' AS PARTIDA_13102,
-		            'P022A' AS CONCEPTO_13102,
-		            P022A + P016K AS IMPORTE_13102,
-		            '' AS IPT13401,
-		            '' AS ICP13401,
-		            '' AS IM13401,
-		            '' AS IPT13402,
-		            '' AS ICP13402,
-		            '' AS IM13402,
-		            '' AS IPT13407,
-		            '' AS ICP13407,
-		            '' AS IM13407,
-		            '' AS IPT13408,
-		            '' AS ICP13408,
-		            '' AS IM13408,
-		            '' AS IPT13411,
-		            '' AS ICP13411,
-		            '' AS IM13411,
-		            '15403' AS PARTIDA_15403,
-		            'P016D' AS CONCEPTO_15403,
-		            P016D + P016E AS IMPORTE_15403,
-		            '15402' AS PARTIDA_15402,
-		            'P016A' AS CONCEPTO_15402,
-		            P016A AS IMPORTE_15402,#------------ BIEN -----------------------
-		            '10001' AS PARTIDA_10001,
-		            'PERCEP' AS CONCEPTO_10001,
-		            round(
-			            P001A + P001B + P001C + P001D + P001E + P002A + P010A + P016C + P016F + P016G + P016H + P016I + P016J + P016L + + P016M + P016N + P021A + P023A + P034A + P035A + P038A + P038B + P038C + P038D + P038E + P038F + P038G + P038H + P038I + P038J + P038K + + P038L + P039A,
-			            2 
-		            ) AS IMPORTE_10001,
-		            '10002' AS PARTIDA_10002,
-		            'P016B' AS CONCEPTO_10002,
-		            P016B AS IMPORTE_10002,
-		            '20001' AS PARTIDA_20001,
-		            'DEDUC' AS CONCEPTO_20001,
-		            round(
-			            D001A + D001B + D001C + D001D + D001E + D002A + D004B + D004C + D004D + D004E + D004F + D004G + D004H + + D004I + D009B + D011A + D012A + D013A + D014A + D019A + D019B,
-			            2 
-		            ) AS IMPORTE_20001,
-		            '20002' AS PARTIDA_20002,
-		            'D004A' AS CONCEPTO_20002,
-		            D004A AS IMPORTE_20002,
-		            '' AS PT20003,
-		            '' AS CP20003,
-		            '' AS IM20003,
-		            '' AS PT20004,
-		            '' AS CP20004,
-		            '' AS IM20004,
-		            '20005' AS PARTIDA_20005,
-		            'D009A' AS CONCEPTO_20005,
-		            D009A + D009C AS IMPORTE_20005,
-		            '20006' AS PARTIDA_20006,
-		            'D007A' AS CONCEPTO_20006,
-		            D007A AS IMPORTE_20006,
-		            '20007' AS PARTIDA_20007,
-		            'D020A' AS CONCEPTO_20007,
-		            D020A AS IMPORTE_20007,
-		            '' AS PT20008,
-		            '' AS CP20008,
-		            '' AS IM20008,
-		            round( TOT_PERC - TOT_DEDU, 2 ) AS TOT_NETO,
-		            round( SDOBAS_ISS ) AS SDO_ISS,
-		            P016B AS despensa,
-		            D004A AS prestamos,
-		            D009A + D009C AS CHC,
-		            D007A AS pension,
-		            FEC_PAGO,
-		            QNA_PAGO 
-	            FROM
-		            "" + tabla + @"" nomina
-		            LEFT JOIN siri_vigente siri ON siri.rfc = nomina.rfc
-		            LEFT JOIN confronta ON confronta.curp = nomina.curp 
-	            WHERE
-		            d001a > 0 
-	            ) AS resumen 
-            GROUP BY
-	            QNA_PAGO
-                               ";
-
 
             using (var connection = new MySqlConnection(connectionString))
             {
                 await connection.OpenAsync();
 
-                using (var command = new MySqlCommand(query, connection))
+                using (var command = new MySqlCommand("GetHeaderSericaSinPrestamos", connection))
                 {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@tabla", tabla);
                     command.Parameters.AddWithValue("@sueldo", "sueldo");
-                    //Console.WriteLine(command.CommandText);
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
@@ -786,122 +325,16 @@ namespace PortalRh.Repository
         {
             var connectionString = _connectionString;
             var result = new List<SericaDetalleReporteModel>();
-            var query = @"
-            SELECT
-            'D' AS TI,
-            IF(confronta.nss is null,siri.nss,confronta.nss) as NSS,
-            trim(nomina.nombre) as NOMBRE,
-            trim(nomina.ape_pat) as APE_PAT,
-            trim(nomina.ape_mat) as APE_MAT,
-            nomina.rfc as RFC,
-            nomina.curp as CURP,
-            IF(SUBSTR(nomina.curp, 11, 1) = 'H', 'M', 'F') AS SEXO,
-            '4212300' AS PAGADURIA,
-            siri.no_emple as NO_EMPLE,
-            '9999999999' AS NUM_CHEQ,
-            CASE confronta.regimen_pensionario 
-                WHEN 'CUENTAS INDIVIDUALES' THEN 2
-                WHEN 'DECIMO TRANSITORIO' THEN 1
-            END AS REGIMEN_ISSSTE,
-            CASE nomina.tipo 
-                WHEN 'ADM' THEN 2 
-                WHEN 'DOC' THEN 3 
-                WHEN 'HON' THEN 5 
-            END AS TIPO_CONTRATO,
-            nomina.tot_perc as TOT_PERC,
-            nomina.tot_dedu as TOT_DEDU,
-            '11301' AS PARTIDA_11301,
-            'P001A' AS CONCEPTO_11301,
-            IF(P001A>0, P001A, IF(P001A = 0 AND tipo='DOC' AND P001B>0, P001B, 0)) AS IMPORTE_11301,
-            '' AS PT12201,
-            '' AS CP12201,
-            '' AS IM12201,
-            '' AS PT12301,
-            '' AS CP12301,
-            '' AS IM12301,
-            '' AS PT13101,
-            '' AS CP13101,
-            '' AS IM13101,
-            '13102' AS PARTIDA_13102,
-            'P022A' AS CONCEPTO_13102,
-            P022A + P016K AS IMPORTE_13102,
-            '' AS IPT13401,
-            '' AS ICP13401,
-            '' AS IM13401,
-            '' AS IPT13402,
-            '' AS ICP13402,
-            '' AS IM13402,
-            '' AS IPT13407,
-            '' AS ICP13407,
-            '' AS IM13407,
-            '' AS IPT13408,
-            '' AS ICP13408,
-            '' AS IM13408,
-            '' AS IPT13411,
-            '' AS ICP13411,
-            '' AS IM13411,
-            '15403' AS PARTIDA_15403,
-            'P016D' AS CONCEPTO_15403,
-            P016D + P016E AS IMPORTE_15403,
-            '15402' AS PARTIDA_15402,
-            'P016A' AS CONCEPTO_15402,
-            P016A AS IMPORTE_15402,
-            '10001' AS PARTIDA_10001,
-            'PERCEP' AS CONCEPTO_10001,
-            IF(ROUND(TOT_PERC - IF(P001A>0, P001A, IF(P001A = 0 AND tipo='DOC' AND P001B>0, P001B, 0)) - P022A - P016D - P016E - P016A - P016B - P016K, 2) <= 0, 0.00, ROUND(TOT_PERC - IF(P001A>0, P001A, IF(P001A = 0 AND tipo='DOC' AND P001B>0, P001B, 0)) - P022A - P016D - P016E - P016A - P016B - P016K, 2)) AS IMPORTE_10001,
-            '10002' AS PARTIDA_10002,
-            'P016B' AS CONCEPTO_10002,
-            P016B AS IMPORTE_10002,
-            '20001' AS PARTIDA_20001,
-            'DEDUC' AS CONCEPTO_20001,
-            ROUND(TOT_DEDU - d004a - D009A - D009C - D007A - D020A, 2) AS IMPORTE_20001,
-            '20002' AS PARTIDA_20002,
-            'D004A' AS CONCEPTO_20002,
-            0 AS IMPORTE_20002,
-            '' as PT20003,
-            '' as CP20003,
-            '' as IM20003,
-            '' as PT20004,
-            '' as CP20004,
-            '' as IM20004,
-            '20005' AS PARTIDA_20005,
-            'D009A' AS CONCEPTO_20005,
-            D009A + D009C AS IMPORTE_20005,
-            '20006' AS PARTIDA_20006,
-            'D007A' AS CONCEPTO_20006,
-            D007A AS IMPORTE_20006,
-            '20007' AS PARTIDA_20007,
-            'D020A' AS CONCEPTO_20007,
-            D020A AS IMPORTE_20007,
-            '' as PT20008,
-            '' as CP20008,
-            '' as IM20008,
-            ROUND(TOT_PERC - TOT_DEDU, 2) as TOT_NETO,
-            ROUND(SDOBAS_ISS) as SDO_ISS,
-            P016B as despensa,
-            0 as prestamos,
-            D009A + D009C as CHC,
-            D007A as pension,
-            TOT_PERC,
-            ROUND(tot_dedu - d004a, 2) as TOT_DEDU1,
-            TOT_NETO + d004a,
-            TIPO
-            FROM "+tabla+@" nomina
-            LEFT JOIN siri_vigente siri ON siri.rfc = nomina.rfc
-            LEFT JOIN confronta ON confronta.curp = nomina.curp
-            WHERE d001a > 0
-            ORDER BY RFC
-               ";
-
 
             using (var connection = new MySqlConnection(connectionString))
             {
                 await connection.OpenAsync();
 
-                using (var command = new MySqlCommand(query, connection))
+                using (var command = new MySqlCommand("GetSericaSinPrestamos", connection))
                 {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@tabla", tabla);
                     command.Parameters.AddWithValue("@sueldo", "sueldo");
-                    //Console.WriteLine(command.CommandText);
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
@@ -1019,174 +452,16 @@ namespace PortalRh.Repository
         {
             var connectionString = _connectionString;
             var result = new List<SericaHeaderModel>();
-            var query = @"
-                SELECT 'C' as ENC0 ,
-                DATE_FORMAT(STR_TO_DATE(FEC_PAGO, '%d/%m/%Y'), '%Y%m%d') AS FechaPago,
-                '4212300' as ENC1,
-                count(TIPO) as ENC2,
-                sum(IMPORTE_11301) as IMPORTE_11301,
-                sum(IM12201) as IM12201,
-                sum(IM12301) as IM12301,
-                sum(IM13101) as IM13101,
-                sum(IMPORTE_13102) as IMPORTE_13102,
-                sum(IM13401) as IM13401,
-                sum(IM13402) as IM13402,
-                sum(IM13407) as IM13407,
-                sum(IM13408) as IM13408,
-                sum(IM13411) as IM13411,
-                sum(IMPORTE_15403) as IMPORTE_15403,
-                sum(IMPORTE_15402) as IMPORTE_15402,
-                sum(despensa) as despensa,
-                sum(prestamos) as prestamos,
-                0 as superissste,
-                0 as ade_medico,
-                sum(CHC) as CHC,
-                sum(pension) as pension,
-                0 as faltas,
-                0 as retardos,
-                ROUND(sum(TOT_PERC),2) as TOT_PERC,
-                sum(tot_dedu) as tot_dedu,
-                sum(tot_neto) as tot_neto
-
-                from
-                (SELECT
-                 'D' AS TIPO,
-                 IF(confronta.nss is null,siri.nss,confronta.nss) as nss,
-                 trim(nomina.nombre) as NOMBRE,
-                 trim(nomina.ape_pat) as APE_PAT,
-                 trim(nomina.ape_mat) as APE_MAT,
-                 nomina.rfc,
-                 nomina.curp,
-                IF
-                 ( SUBSTR( nomina.curp, 11, 1 ) = 'H', 'M', 'F' ) AS sexo,
-                 '4212300' AS pagaduria,
-                 siri.no_emple,
-                 '9999999999' AS NUM_CHEQ,
-                 CASE confronta.regimen_pensionario 
-                 WHEN 'CUENTAS INDIVIDUALES' THEN
-                  2
-                 WHEN 'DECIMO TRANSITORIO' THEN
-                  1
-                END AS Regimen_ISSSTE,
-
-                CASE
-                 nomina.tipo 
-                 WHEN 'ADM' THEN
-                 2 
-                 WHEN 'DOC' THEN
-                 3 
-                 WHEN 'HON' THEN
-                 5 
-                 END AS TIPO_CONTRATO,
-                 nomina.tot_perc,
-                 nomina.tot_dedu,
-                 '11301' AS PARTIDA_11301,
-                  'P001A' AS CONCEPTO_11301,
-                  if(P001A>0,P001A,if( p001a = 0 and  tipo='DOC' and P001B>0,P001B,0)) AS IMPORTE_11301,
-                 '' AS PT12201,
-                 '' AS CP12201,
-                 '' AS IM12201,
-                 '' AS PT12301,
-                 '' AS CP12301,
-                 '' AS IM12301,
-                 '' AS PT13101,
-                 '' AS CP13101,
-                 '' AS IM13101,
-                 '13102' AS PARTIDA_13102,
-                  'P022A' AS CONCEPTO_13102,
-                   P022A+P016K AS IMPORTE_13102,
-                  '' AS IPT13401,
-                  '' AS ICP13401,
-                  '' AS IM13401,
-                  '' AS IPT13402,
-                  '' AS ICP13402,
-                  '' AS IM13402,
-                  '' AS IPT13407,
-                  '' AS ICP13407,
-                  '' AS IM13407,
-                  '' AS IPT13408,
-                  '' AS ICP13408,
-                  '' AS IM13408,
-                  '' AS IPT13411,
-                  '' AS ICP13411,
-                  '' AS IM13411,
-
-
-                  '15403' AS PARTIDA_15403,
-                  'P016D' AS CONCEPTO_15403,
-                   P016D+P016E AS IMPORTE_15403,
-
-                  '15402' AS PARTIDA_15402,
-                  'P016A' AS CONCEPTO_15402,
-                   P016A AS IMPORTE_15402,
-                #------------ BIEN -----------------------	 
-                  '10001' AS PARTIDA_10001,
-                  'PERCEP' AS CONCEPTO_10001,
-                  round(P001A+P001B+P001C+P001D+P001E+P002A+P010A+P016C+P016F+P016G+P016H+P016I+P016J+P016L+
-                  +P016M+P016N+P021A+P023A+P034A+P035A+P038A+P038B+P038C+P038D+P038E+P038F+P038G+P038H+P038I+P038J+P038K+
-                  +P038L+P039A,2)  as IMPORTE_10001,
-
-                  '10002' AS PARTIDA_10002,
-                  'P016B' AS CONCEPTO_10002,
-                   P016B AS IMPORTE_10002,
-
-                '20001' AS PARTIDA_20001,
-                'DEDUC' AS CONCEPTO_20001,
-                round(D001A+D001B+D001C+D001D+D001E+D002A+D004B+D004C+D004D+D004E+D004F+D004G+D004H+
-                +D004I+D009B+D011A+D012A+D013A+D014A+D019A+D019B,2) AS IMPORTE_20001,
-
-                 '20002' AS PARTIDA_20002,
-                  'D004A' AS CONCEPTO_20002,
-                   D004A AS IMPORTE_20002,
-
-                  '' as PT20003,
-                  '' as CP20003,
-                  '' as IM20003,
-                  '' as PT20004,
-                  '' as CP20004,
-                  '' as IM20004,
-
-
-                 '20005' AS PARTIDA_20005,
-                  'D009A' AS CONCEPTO_20005,
-                   D009A+D009C AS IMPORTE_20005,
-
-                 '20006' AS PARTIDA_20006,
-                  'D007A' AS CONCEPTO_20006,
-                   D007A AS IMPORTE_20006,
-
-                 '20007' AS PARTIDA_20007,
-                  'D020A' AS CONCEPTO_20007,
-                   D020A AS IMPORTE_20007,
-
-                  '' as PT20008,
-                  '' as CP20008,
-                  '' as IM20008,
-
-                  round(TOT_PERC-TOT_DEDU,2)  as TOT_NETO,
-                  round(SDOBAS_ISS)  as SDO_ISS ,
-                  P016B as despensa,
-                  D004A as prestamos,
-                  D009A+D009C as CHC,
-                  D007A as pension,
-                  FEC_PAGO,QNA_PAGO
-                FROM
-                 " + tabla + @"	nomina
-                 LEFT JOIN siri_vigente siri ON siri.rfc = nomina.rfc
-                 left join confronta on confronta.curp = nomina.curp 
-                 /* where P001A > 0 and SDOBAS_ISS>0 or ( p001a = 0 and  tipo='DOC' and P001B>0) */
-                 )  as resumen
-                 GROUP BY QNA_PAGO";
-
-
+   
             using (var connection = new MySqlConnection(connectionString))
             {
                 await connection.OpenAsync();
 
-                using (var command = new MySqlCommand(query, connection))
+                using (var command = new MySqlCommand("GetHeaderSericaIncremento", connection))
                 {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@tabla", tabla);
                     command.Parameters.AddWithValue("@sueldo", "sueldo");
-                    //Console.WriteLine(command.CommandText);
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
@@ -1244,148 +519,16 @@ namespace PortalRh.Repository
 
             var connectionString = _connectionString;
             var result = new List<SericaDetalleReporteModel>();
-            var query = @"
-            SELECT
-	            'D' AS TI,
-	            IF(confronta.nss is null,siri.nss,confronta.nss) as NSS,
-	            trim(nomina.nombre) as NOMBRE,
-	            trim(nomina.ape_pat) as APE_PAT,
-	            trim(nomina.ape_mat) as APE_MAT,
-	            nomina.rfc as RFC,
-	            nomina.curp as CURP,
-            IF
-	            ( SUBSTR( nomina.curp, 11, 1 ) = 'H', 'M', 'F' ) AS SEXO,
-	            '4212300' AS PAGADURIA,
-	            siri.no_emple as NO_EMPLE,
-	            '9999999999' AS NUM_CHEQ,
-	            CASE confronta.regimen_pensionario 
-	            WHEN 'CUENTAS INDIVIDUALES' THEN
-		            2
-	            WHEN 'DECIMO TRANSITORIO' THEN
-		            1
-            END AS REGIMEN_ISSSTE,
-	
-            CASE
-	            nomina.tipo 
-	            WHEN 'ADM' THEN
-	            2 
-	            WHEN 'DOC' THEN
-	            3 
-	            WHEN 'HON' THEN
-	            5 
-	            END AS TIPO_CONTRATO,
-	            '20230101' AS FINI,
-	            '20231031' AS FFIN,
-	            nomina.tot_perc as TOT_PERC,
-	            nomina.tot_dedu as TOT_DEDU,
-	            '11301' AS PARTIDA_11301,
-              'P001A' AS CONCEPTO_11301,
-              if(P001A>0,P001A,if( p001a = 0 and  tipo='DOC' and P001B>0,P001B,0)) AS IMPORTE_11301,
-	            '' AS PT12201,
-	            '' AS CP12201,
-	            '' AS IM12201,
-	            '' AS PT12301,
-	            '' AS CP12301,
-	            '' AS IM12301,
-	            '' AS PT13101,
-	            '' AS CP13101,
-	            '' AS IM13101,
-	            '13102' AS PARTIDA_13102,
-              'P022A' AS CONCEPTO_13102,
-               P022A+P016K AS IMPORTE_13102,
-	             '' AS IPT13401,
-	             '' AS ICP13401,
-	             '' AS IM13401,
-	             '' AS IPT13402,
-	             '' AS ICP13402,
-	             '' AS IM13402,
-	             '' AS IPT13407,
-	             '' AS ICP13407,
-	             '' AS IM13407,
-	             '' AS IPT13408,
-	             '' AS ICP13408,
-	             '' AS IM13408,
-	             '' AS IPT13411,
-	             '' AS ICP13411,
-	             '' AS IM13411,
-	             '15403' AS PARTIDA_15403,
-              'P016D' AS CONCEPTO_15403,
-               P016D+P016E AS IMPORTE_15403,
-	 
-	             '15402' AS PARTIDA_15402,
-              'P016A' AS CONCEPTO_15402,
-               P016A AS IMPORTE_15402,
-            #------------ BIEN -----------------------	 
-		            '10001' AS PARTIDA_10001,
-		            'PERCEP' AS CONCEPTO_10001,
-		            round(P001B+P001C+P001D+P001E+P002A+P009A+P010A+P016C+P016F+P016G+P016H+P016I+P016J+P016L+
-		            +P016M+P016N+P021A+P023A+P034A+P035A+P038A+P038B+P038C+P038D+P038E+P038F+P038G+P038H+P038I+P038J+P038K+
-		            +P038L+P039A,2)  as IMPORTE_10001,
-
-	             '10002' AS PARTIDA_10002,
-	             'P016B' AS CONCEPTO_10002,
-	              P016B AS IMPORTE_10002,
-		
-
-
-            '20001' AS PARTIDA_20001,
-            'DEDUC' AS CONCEPTO_20001,
-            round(D001A+D001B+D001C+D001D+D001E+D002A+D003E+D004B+D004C+D004D+D004E+D004F+D004G+D004H+
-            +D004I+D009B+D011A+D012A+D013A+D014A+D019A+D019B,2) AS IMPORTE_20001,
-		
-	            '20002' AS PARTIDA_20002,
-              'D004A' AS CONCEPTO_20002,
-               D004A AS IMPORTE_20002,
-	 
-	             '' as PT20003,
-	             '' as CP20003,
-	             '' as IM20003,
-	             '' as PT20004,
-	             '' as CP20004,
-	             '' as IM20004,
-
-	 
-	            '20005' AS PARTIDA_20005,
-              'D009A' AS CONCEPTO_20005,
-               D009A+D009C AS IMPORTE_20005,
-	 
-	            '20006' AS PARTIDA_20006,
-              'D007A' AS CONCEPTO_20006,
-               D007A AS IMPORTE_20006,
-	 
-	            '20007' AS PARTIDA_20007,
-              'D020A' AS CONCEPTO_20007,
-               D020A AS IMPORTE_20007,
-	 
-	             '' as PT20008,
-	             '' as CP20008,
-	             '' as IM20008,
-
-	             round(TOT_PERC-TOT_DEDU,2)  as TOT_NETO,
-	             round(SDOBAS_ISS)  as SDO_ISS ,
-	             P016B as despensa,
-	             D004A as prestamos,
-		            D009A+D009C as CHC,
-		            D007A as pension,
-		            TOT_PERC,
-		            TOT_DEDU,
-		            TOT_NETO,TIPO
-            FROM
-	            "+tabla+@"	nomina
-	            LEFT JOIN siri_vigente siri ON siri.rfc = nomina.rfc
-	            left join confronta on confronta.curp = nomina.curp 
-	            /*where P001A > 0 and SDOBAS_ISS>0 or ( p001a = 0 and  tipo='DOC' and P001B>0)*/
-               ";
-
 
             using (var connection = new MySqlConnection(connectionString))
             {
                 await connection.OpenAsync();
-
-                using (var command = new MySqlCommand(query, connection))
+ 
+                using (var command = new MySqlCommand("GetSericaIncremento", connection))
                 {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@tabla", tabla);
                     command.Parameters.AddWithValue("@sueldo", "sueldo");
-                  
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
@@ -1504,38 +647,15 @@ namespace PortalRh.Repository
 
             var connectionString = _connectionString;
             var result = new List<ResumenConceptos>();
-            var query = @"
-                    SELECT
-	                    TIPO,
-	                    CT,
-	                    RFC,
-	                    CONCAT_ws( ' ', TRIM( APE_PAT ), TRIM( APE_MAT ), TRIM( NOMBRE ) ) AS nombre,
-	                    D004E AS METLIFE,
-	                    D004J AS KONDINERO,
-	                    D004k AS CREDIFIEL,
-	                    D011A AS FONACOT,
-                    IF
-	                    ( tipo = 'ADM', D019A, 0 ) AS SUTCONALEP,
-                    IF
-	                    ( tipo = 'DOC', D019A, 0 ) AS SITACONQROO,
-	                    D019C AS SITEM 
-                    FROM "+tabla+@" 
-                    
-                    ORDER BY
-	                    tipo,
-	                    ct,
-	                    APE_PAT,
-	                    APE_MAT,
-	                    NOMBRE
-          ";
 
             using (var connection = new MySqlConnection(connectionString))
             {
                 await connection.OpenAsync();
 
-                using (var command = new MySqlCommand(query, connection))
+                using (var command = new MySqlCommand("GetResumenConceptos", connection))
                 {
-                 
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@tabla", tabla);
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         try
