@@ -1,8 +1,5 @@
-﻿using Dapper;
-using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.InkML;
-using Google.Protobuf.WellKnownTypes;
-using Microsoft.EntityFrameworkCore;
+
+
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MySql.Data.MySqlClient;
 using MySqlX.XDevAPI.Common;
@@ -144,6 +141,12 @@ namespace PortalRh.Repository
             {
                 await connection.OpenAsync();
 
+
+      
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                await connection.OpenAsync();
+
                 using (var command = new MySqlCommand("GetRegNominasDBTable", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
@@ -231,7 +234,6 @@ namespace PortalRh.Repository
             using (var connection = new MySqlConnection(connectionString))
             {
                 await connection.OpenAsync();
-
 
                 using (var command = new MySqlCommand("GetSericaPrestamos", connection))
                 {
