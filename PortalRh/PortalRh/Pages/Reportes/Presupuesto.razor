@@ -1,0 +1,181 @@
+﻿@page "/Presupuesto"
+@using Microsoft.EntityFrameworkCore
+@using PortalRh.Data
+@using PortalRh.Models
+@using PortalRh.Repository
+@using PortalRh.Utils
+@using ClosedXML.Excel;
+@using System.Text;
+@using System.Collections.Generic;
+@using System.IO;
+
+@inject IrepositoryMySQL myService;
+@inject IJSRuntime _JsService;
+@inject IJSRuntime JS
+@inject ApplicationDbContextMySQL dbContext
+
+<h3>Presupuesto</h3>
+<select @bind="selectedFuenteF">
+    <option value="E-E">Estatal</option>
+    <option value="F-F">Federa </option>
+    <option value="I-P">Ingresos Propios</option>
+</select>
+<button @onclick="ExportarResultados">Exportar a Excel</button>
+<button @onclick="insert">poblar tabla</button>
+
+@code {
+    private string selectedFuenteF = "E-E"; // Valor inicial
+   
+    private async Task insert()
+    {
+        var urModels = await myService.GetURModels();
+        var partidas = await myService.GetPartidas();
+        var tasks = new List<Task>();
+        var contador = 0;
+
+        // Crear tareas para cada combinación
+        foreach (var ur in urModels)
+        {
+            foreach (var partida in partidas)
+            {
+                tasks.Add(Task.Run(async () =>
+                {
+                    try
+                    {
+                        await myService.InsertConceptosXPartidasAsync(partida.partida, partida.concepto, ur.ClaveUR, selectedFuenteF);
+
+                        // Log para verificar combinaciones insertadas
+                        // Console.WriteLine($"Partida: {partida.partida}, Concepto: {partida.concepto}, UR: {ur.ClaveUR}");
+                        Interlocked.Increment(ref contador);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error en partida {partida.partida}, concepto {partida.concepto}, UR {ur.ClaveUR}: {ex.Message}");
+                    }
+                }));
+            }
+        }
+
+        // Esperar todas las tareas
+        await Task.WhenAll(tasks);
+
+        // Total de inserciones
+        // Console.WriteLine($"Total de inserciones: {contador}");
+    }
+
+
+    private async Task ExportarResultados ()
+    {
+
+        var prueba = await myService.GetProyeccionFinalModels();
+        var gruposPorUR = prueba.GroupBy(item => item.D_CLAVE_UR);
+        var gruposPorFuentef = prueba.GroupBy(item => item.Sostenimiento);
+        var partidas = await myService.GetPartidasReporte();
+        var urs = await myService.GetURModels();
+
+        foreach (var ur in urs)
+        {
+            try
+            {
+                var list1 = await myService.GetProyeccionFinalUR2(ur.ClaveUR);
+                // var listpr = await myService.GetProyeccionFinalUR2();
+
+
+
+                // Ruta de la plantilla de Excel
+                string rutaPlantilla = "wwwroot/Templates/TemplateConceptos.xlsx";
+
+                // Agrupar los datos por F_FOLIO
+                var groupedData = list1.GroupBy(x => x.F_FOLIO).ToDictionary(g => g.Key, g => g.ToList());
+
+                // Verificar que la suma total de cada grupo (UR + F_FOLIO) sea mayor a 0
+                var sumaTotalPorGrupo = groupedData.ToDictionary(
+                    group => group.Key,
+                    group => group.Value.Sum(item => item.total)
+                );
+
+                // Si todos los grupos tienen suma total igual a 0, no se genera el archivo Excel
+                if (sumaTotalPorGrupo.All(g => g.Value <= 0))
+                {
+                    Console.WriteLine($"La suma total para UR {ur.ClaveUR} es 0 en todos los folios. No se generará el archivo Excel.");
+                    continue; // Pasar al siguiente UR
+                }
+
+                // Cargar la plantilla
+                using (var book = new XLWorkbook(rutaPlantilla))
+                {
+                    // Iterar sobre los grupos (F_FOLIO) para crear hojas separadas
+                    foreach (var group in groupedData)
+                    {
+                        string folio = group.Key;
+                        var items = group.Value;
+
+                        // Verificar si la suma total del grupo actual es 0
+                        if (sumaTotalPorGrupo[folio] <= 0)
+                        {
+                            Console.WriteLine($"El grupo con F_FOLIO {folio} tiene una suma total de 0. No se incluirá en el archivo Excel.");
+                            continue; // Pasar al siguiente grupo
+                        }
+
+                        // Crear una copia de la primera hoja y renombrarla al F_FOLIO actual
+                        IXLWorksheet sheet = book.Worksheet(1).CopyTo(folio);
+                        
+
+                        // Configurar valores generales
+                        sheet.Cell(3, 2).Value = ur.ClaveUR;
+                        
+                        sheet.Cell(4, 3).Value = folio;
+                        sheet.Cell(5, 19).Value = selectedFuenteF;
+
+                        // Agregar los datos a la hoja
+                        int rowStart = 9; // Fila donde comienzan los datos
+                        foreach (var item in items)
+                        {
+                            int colIndex = 1; // Índice inicial de columna
+                            sheet.Cell(3, 3).Value = item.NombreUR;
+                            sheet.Cell(4, 4).Value = item.Unidad;
+                            sheet.Cell(rowStart, colIndex++).Value = item.Partida;
+                            sheet.Cell(rowStart, colIndex++).Value = item.Descrip;
+                            sheet.Cell(rowStart, colIndex++).Value = item.Enero;
+                            sheet.Cell(rowStart, colIndex++).Value = item.febrero;
+                            sheet.Cell(rowStart, colIndex++).Value = item.marzo;
+                            sheet.Cell(rowStart, colIndex++).Value = item.abril;
+                            sheet.Cell(rowStart, colIndex++).Value = item.mayo;
+                            sheet.Cell(rowStart, colIndex++).Value = item.junio;
+                            sheet.Cell(rowStart, colIndex++).Value = item.julio;
+                            sheet.Cell(rowStart, colIndex++).Value = item.agosto;
+                            sheet.Cell(rowStart, colIndex++).Value = item.septiembre;
+                            sheet.Cell(rowStart, colIndex++).Value = item.octubre;
+                            sheet.Cell(rowStart, colIndex++).Value = item.noviembre;
+                            sheet.Cell(rowStart, colIndex++).Value = item.diciembre;
+                            //sheet.Cell(rowStart, colIndex + 2).Value = item.total;
+                            rowStart++;
+                        }
+                        
+                       
+                    }
+                    book.Worksheet(1).Delete();
+
+                    // Guardar el archivo modificado en un MemoryStream
+                    using (var memory = new MemoryStream())
+                    {
+                        book.SaveAs(memory);
+                        var nombreExcel = string.Concat(ur.ClaveUR, "_", selectedFuenteF, "_", ".xlsx");
+
+                        await _JsService.InvokeAsync<object>(
+                            "DownloadExcel",
+                            nombreExcel,
+                            Convert.ToBase64String(memory.ToArray())
+                        );
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al procesar UR {ur.ClaveUR}: {ex.Message}");
+            }
+        }
+
+        }
+        
+    }

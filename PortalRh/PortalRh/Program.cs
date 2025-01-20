@@ -1,29 +1,23 @@
 using Blazorise.Bootstrap5;
 using Blazorise.Icons.FontAwesome;
 using Microsoft.AspNetCore.Components.Authorization;
-
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PortalRh.Data;
 using PortalRh.Areas.Identity;
 using PortalRh.Repository;
-
 using BlazorDownloadFile;
 using PortalRh.Models;
+using PortalRh;
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-options.UseSqlServer(connectionString));
 var mysqlconnectionString = builder.Configuration.GetConnectionString("MysqlConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContextMySQL>(options =>
 options.UseMySQL(mysqlconnectionString));
-//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//options.UseMySQL("MysqlConnection"));
 
-//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
@@ -37,20 +31,35 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
 //builder.Services.AddScoped<RegNominasService>();
 builder.Services.AddTransient<SericaHeaderModel>();
 builder.Services.AddTransient<SericaDetalleReporteModel>();
-
+builder.Services.AddTransient<PartidasModel>();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
-builder.Services.AddTransient<IRepository, Repository>();
+
 builder.Services.AddTransient<IrepositoryMySQL, RepositoryMySQL>();
 
+builder.Services.AddScoped<FileService>();
 
 builder.Services.AddBlazorDownloadFile();
 
-
 AddBlazorise(builder.Services);
 
+var defaultCulture = new CultureInfo("es-MX");
+var localizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(defaultCulture),
+    SupportedCultures = new List<CultureInfo> { defaultCulture },
+    SupportedUICultures = new List<CultureInfo> { defaultCulture }
+};
+
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.DefaultRequestCulture = new RequestCulture(defaultCulture);
+    options.SupportedCultures = new List<CultureInfo> { defaultCulture };
+    options.SupportedUICultures = new List<CultureInfo> { defaultCulture };
+});
 
 
 var app = builder.Build();
+app.UseRequestLocalization(localizationOptions);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -64,7 +73,6 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
-
 app.UseRouting();
 
 app.UseAuthorization();
@@ -72,7 +80,6 @@ app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
 app.Run();
-
 
 void AddBlazorise(IServiceCollection services)
 {

@@ -13,5 +13,6 @@
         public decimal SUTCONALEP { get; set; }
         public decimal SITACONQROO { get; set; }
         public decimal SITEM { get; set; }
+        public decimal Credifom { get; set; }
     }
 }

@@ -1,0 +1,45 @@
+﻿@page "/reporteTrimestral"
+
+
+@using PortalRh.Models
+@using PortalRh.Repository
+@using Microsoft.EntityFrameworkCore
+@using PortalRh.Data
+
+@using PortalRh.Utils
+@using ClosedXML.Excel;
+@using System.Text;
+@using System.Collections.Generic;
+@using ClosedXML.Excel;
+@using System.IO;
+
+
+@inject IrepositoryMySQL myService;
+@inject IJSRuntime _JsService;
+<h3>reportes Trimestrales</h3>
+
+@if (RegistroTrimestral == null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <select @bind:get="selectedDbTable" @bind:set="OnSelectedDbTableChanged">
+        @foreach (var recurso in RegistroTrimestral)
+        {
+            
+            <option value="@($"{recurso.DBTable}|{recurso.CAMPANIA}|{recurso.PeriodoInicio}|{recurso.PeriodoFin}|{recurso.TablaAnterior}|{recurso.Trimestre}")">
+                @recurso.info
+            </option>
+        
+        }
+}
+    </select>
+    <button class="btn btn-primary flex-fill m-1" @onclick="ExportarexcelTrimestralDOC">Generar reporte docentes</button>
+    <button class="btn btn-primary flex-fill m-1" @onclick="ExportarexcelTrimestralADM">Generar reporte Administrativos</button>
+    <button class="btn btn-primary flex-fill m-1" @onclick="ExportarExce">Generar excel</button>
+
+
+    
+
+}
