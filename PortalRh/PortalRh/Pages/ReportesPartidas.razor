@@ -1,0 +1,97 @@
+﻿@page "/reportesPartidas"
+@using Microsoft.EntityFrameworkCore
+@using PortalRh.Data
+@using PortalRh.Models
+@using PortalRh.Repository
+@using PortalRh.Utils
+@using ClosedXML.Excel;
+@using System.Text;
+@using System.Collections.Generic;
+@using System.IO;
+
+@inject IrepositoryMySQL myService;
+@inject IJSRuntime _JsService;
+@inject IJSRuntime JS
+@inject ApplicationDbContextMySQL dbContext
+
+<h3>Prueba Generar reportes</h3>
+<button @onclick="exportExcelConceptos">Exportar a Excel</button>
+<select @bind="selectedFuenteF">
+    <option value="E-E">Estatal</option>
+    <option value="F-E">Federa Estatal</option>
+    <option value="IP">Ingresos Propios</option>
+</select>
+
+
+<button @onclick="exportExcelConceptos">Exportar a Excel</button>
+
+@code {
+    private string selectedFuenteF = "E-E"; // Valor inicial
+    protected override async void OnInitialized()
+    {try
+        {
+            var prueba = await myService.GetProyeccionFinalModels();
+            var gruposPorUR = prueba.GroupBy(item => item.D_CLAVE_UR);
+        }
+        catch (Exception ex)
+        {
+            Console.Write(ex);
+        }
+    }
+    private async Task exportExcelConceptos()
+
+    {
+        try
+        {
+        var list = await myService.GetPartidas(selectedFuenteF);
+
+        
+            // Ruta de la plantilla de Excel
+            string rutaPlantilla = "wwwroot/Templates/TemplateConceptos.xlsx";
+
+            // Cargar la plantilla
+            using (var book = new XLWorkbook(rutaPlantilla))
+            {
+                // Acceder a la primera hoja de trabajo de la plantilla
+                IXLWorksheet sheet = book.Worksheet(1);
+
+                // Llenar datos en la primera hoja
+                for (int row = 1; row <= list.Count; row++)
+                {
+
+                    var item = list[row - 1];
+                    sheet.Cell(8, 17).Value = selectedFuenteF;
+                    sheet.Cell(9, 17).Value = item.Partida11301;
+                    sheet.Cell(10, 17).Value = item.Partida11302;
+                    sheet.Cell(11, 17).Value = item.Partida12101;
+                    sheet.Cell(12, 17).Value = item.Partida13101;
+                    sheet.Cell(13, 17).Value = item.Partida13102;
+                    sheet.Cell(14, 17).Value = item.Partida13103;
+                    sheet.Cell(15, 17).Value = item.Partida13201;
+                    sheet.Cell(16, 17).Value = item.Partida13202;
+                    sheet.Cell(17, 17).Value = item.Partida13204;
+                    // sheet.Cell(18, 17).Value = item.Partida13401;
+                    // sheet.Cell(19, 17).Value = item.Partida14101;
+                   
+                }
+
+                // Guardar el archivo modificado en un MemoryStream
+                using (var memory = new MemoryStream())
+                {
+                    book.SaveAs(memory);
+                    var nombreExcel = string.Concat("PROYECCION2025", DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss"), ".xlsx");
+
+                    await _JsService.InvokeAsync<object>(
+                        "DownloadExcel",
+                        nombreExcel,
+                        Convert.ToBase64String(memory.ToArray())
+                    );
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Write(ex);
+        }
+    }
+}

@@ -1,0 +1,75 @@
+﻿@page "/upload-file"
+@using PortalRh
+@inject FileService fileService
+
+<h3>Upload File to Azure Blob Storage</h3>
+
+@if (!string.IsNullOrEmpty(uploadedFileUrl))
+{
+    <p>File uploaded successfully!</p>
+    <a href="@uploadedFileUrl" target="_blank">View Uploaded File</a>
+}
+else
+{
+    <EditForm Model="this" OnValidSubmit="HandleFileSelected">
+        <InputFile OnChange="HandleFileChange" />
+        <ValidationMessage For="@(() => selectedFile)" />
+        <button type="submit" class="btn btn-primary" disabled="@isUploading">Upload</button>
+    </EditForm>
+
+    @if (isUploading)
+    {
+        <p>Uploading...</p>
+    }
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p class="text-danger">@errorMessage</p>
+    }
+}
+
+@code {
+    private IBrowserFile selectedFile;
+    private bool isUploading = false;
+    private string uploadedFileUrl;
+    private string errorMessage;
+
+    private void HandleFileChange(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+    }
+
+    private async Task HandleFileSelected()
+    {
+        if (selectedFile != null)
+        {
+            isUploading = true;
+            errorMessage = string.Empty;
+            try
+            {
+                // Convertir IBrowserFile a Stream para subirlo
+                var memoryStream = new MemoryStream();
+                await selectedFile.OpenReadStream().CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+
+                uploadedFileUrl = await fileService.SaveFile("almacenar", new FormFile(memoryStream, 0, selectedFile.Size, null, selectedFile.Name)
+                    {
+                        Headers = new HeaderDictionary(),
+                        ContentType = selectedFile.ContentType
+                    });
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Error uploading file: {ex.Message}";
+            }
+            finally
+            {
+                isUploading = false;
+            }
+        }
+        else
+        {
+            errorMessage = "Please select a file.";
+        }
+    }
+}

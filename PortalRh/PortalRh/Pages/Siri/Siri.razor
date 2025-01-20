@@ -1,0 +1,34 @@
+﻿@page "/Siri"
+@using Microsoft.EntityFrameworkCore
+@using PortalRh.Data
+@using PortalRh.Models
+@using PortalRh.Repository
+@using PortalRh.Utils
+@using ClosedXML.Excel;
+@using System.Text;
+@using System.Collections.Generic;
+@using System.IO;
+
+@inject IrepositoryMySQL myService;
+@inject IJSRuntime _JsService;
+@inject IJSRuntime JS
+@inject ApplicationDbContextMySQL dbContext
+
+
+
+
+<h3>SIRI</h3>
+<button @onclick="prsiri">poblar tabla</button>
+
+@code {
+    private async Task prsiri()
+    {
+        var l = await myService.GetSiriLineaAlta();
+
+        // Esperar todas las tareas
+
+
+        // Total de inserciones
+        // Console.WriteLine($"Total de inserciones: {contador}");
+    }
+}

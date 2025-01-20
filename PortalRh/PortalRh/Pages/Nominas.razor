@@ -1,0 +1,90 @@
+﻿@page "/ReportesTerceros"
+
+@using Microsoft.EntityFrameworkCore
+@using PortalRh.Data
+@using PortalRh.Models
+@using PortalRh.Repository
+@using PortalRh.Utils
+@using ClosedXML.Excel;
+@using System.Text;
+@using System.Collections.Generic;
+@using ClosedXML.Excel;
+@using System.IO;
+
+@inject IrepositoryMySQL myService;
+@inject IJSRuntime _JsService;
+
+
+
+
+<h3>ESCOGER NOMINA</h3>
+
+@if (ListNominas == null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <select @bind:get="selectedDbTable" @bind:set="OnSelectedDbTableChanged">
+        @foreach (var recurso in ListNominas)
+        {
+            var fecPagoFormatted = recurso.FecPago?.ToString("dd/MM/yyyy");
+            <option value="@($"{recurso.DbTable}|{recurso.Qna}|{fecPagoFormatted}|{recurso.Year}")">
+                @string.Concat("QNA ", recurso.Qna , "-" , recurso.Year ,"|", recurso.Descripcion)
+            </option>
+        }
+    </select>
+
+}
+
+    <div class="bg-info clearfix"></div>
+    <div class="container mt-4">
+        <div class="bg-info clearfix py-2 mb-3">
+            <p class="mb-0 text-center font-weight-bold">ARCHIVOS QNALES</p>
+        </div>
+        <div class="btn-group d-flex flex-wrap mb-3" role="group">
+            @* <button @onclick="ExportData">Export to Excel</button> *@
+    @*         <button class="btn btn-primary flex-fill m-1" @onclick="ExportarExcelSerica">Serica encabezado excel</button>
+        <button class="btn btn-primary flex-fill m-1" @onclick="ExportarExcelDetalleSerica">Serica Detalle Excel</button> *@
+        <button class="btn btn-primary flex-fill m-1" @onclick="ExportarTxtSericaPrestamos">Serica prestamos</button>
+        <button class="btn btn-primary flex-fill m-1" @onclick="ExportarTxtSericaSPrestamos">Serica sin prestamos</button>
+        
+ @*        <button id="serica" class="btn btn-secondary" type="button">Serica</button> *@
+        <button class="btn btn-primary flex-fill m-1" @onclick="ExportarTxtSericaIncremento">Serica incremento</button>
+        <button class="btn btn-primary flex-fill m-1" @onclick="exportExcelTerceros">detalle terceros excel</button>
+        <button class="btn btn-primary flex-fill m-1" @onclick="exportExcelFonacot">Fonacot</button>
+        <button class="btn btn-primary flex-fill m-1" @onclick="exportExcelFovisste">FOVISSTE</button>
+        <button class="btn btn-primary flex-fill m-1" @onclick="SipeSic">sipe</button>
+       
+        @* <button id="sipe" class="btn btn-primary flex-fill m-1" type="button">Sipe Sic</button>
+        <button id="cifras" class="btn btn-primary flex-fill m-1" type="button">Cifras Control</button>
+        <button id="fonacot" class="btn btn-primary flex-fill m-1" type="button">Fonacot</button>
+        <button id="fovissste" class="btn btn-primary flex-fill m-1" type="button">Fovissste</button>
+        <button id="terceros" class="btn btn-primary flex-fill m-1" type="button">Pago Terceros</button> *@
+        </div>
+@* todo
+        <div class="bg-info clearfix py-2 mb-3">
+            <p class="mb-0 text-center font-weight-bold">SEFIPLAN PRENOMINA</p>
+        </div>
+        <div class="btn-group d-flex flex-wrap mb-3" role="group">
+            <button id="rsm_sefiplan" class="btn btn-primary flex-fill m-1" type="button">Resumen Sefiplan estatal</button>
+            <button id="rsm_sefiplan2" class="btn btn-primary flex-fill m-1" type="button">Resumen Sefiplan federal</button>
+        </div> *@
+
+   @*   TODO   <div class="bg-info clearfix py-2 mb-3">
+            <p class="mb-0 text-center font-weight-bold">TIMBRADO</p>
+        </div>
+        <div class="btn-group d-flex flex-wrap mb-3" role="group">
+            <button id="rsm_timbrado" class="btn btn-primary flex-fill m-1" type="button">Resumen Timbrado</button>
+        </div>
+
+        <div class="bg-info clearfix py-2 mb-3">
+            <p class="mb-0 text-center font-weight-bold">CONCILIACION FINANCIEROS</p>
+        </div>
+        <div class="btn-group d-flex flex-wrap mb-3" role="group">
+            <button id="rsm_conceptos" class="btn btn-primary flex-fill m-1" type="button">Resumen Conceptos</button>
+            <button id="rsm_conceptos2" class="btn btn-primary flex-fill m-1" type="button">Resumen Conceptos 21-24</button>
+        </div> *@
+    </div>
+
+
