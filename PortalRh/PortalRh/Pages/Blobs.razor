@@ -1,0 +1,66 @@
+﻿@page "/list-blobs"
+@using PortalRh
+@using Microsoft.JSInterop
+@inject IJSRuntime _jsServicio
+@inject FileService fileService
+
+
+<h3>List of Blobs in Azure Blob Storage</h3>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (blobs != null && blobs.Count > 0)
+{
+    <ul>
+        @foreach (var blob in blobs)
+        {
+            <li>
+                @blob
+                <button @onclick="() => DownloadBlob(blob)" class="btn btn-primary btn-sm">Download</button>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>No blobs found in the container.</p>
+}
+
+@code {
+    private List<string> blobs;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            blobs = await fileService.ListBlobs("almacenar");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error retrieving blobs: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task DownloadBlob(string blobName)
+    {
+        try
+        {
+            var stream = await fileService.DownloadBlob("almacenar", blobName);
+            var fileName = blobName;
+
+            using var streamRef = new DotNetStreamReference(stream: stream);
+            await _jsServicio.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error downloading blob: {ex.Message}");
+        }
+    }
+}

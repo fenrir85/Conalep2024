@@ -18,7 +18,6 @@ namespace PortalRh.Models
         public DateOnly Birthday { get; set; }
         public string SituacionContribuyente { get; set; }
         public DateOnly LastUpdateSat { get; set; }
-   
         public string RegimenFiscal { get; set; }
         public DateOnly FechaAlta { get; set; }
         public string Url { get; set; }

@@ -1,5 +1,9 @@
-﻿namespace PortalRh.Models
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+
+namespace PortalRh.Models
 {
+    [Keyless]
     public class SericaDetalleReporteModel
     {
         public string? TI { get; set; }
@@ -55,6 +59,8 @@
         public decimal IMPORTE_15402 { get; set; }
         public string? PARTIDA_10001 { get; set; }
         public string? CONCEPTO_10001 { get; set; }
+        [DisplayFormat(DataFormatString = "{0:C}")]
+      
         public decimal IMPORTE_10001 { get; set; }
         public string? PARTIDA_10002 { get; set; }
         public string? CONCEPTO_10002 { get; set; }
